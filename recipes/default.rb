@@ -26,7 +26,7 @@ else
   log "*** Downloading #{node['chef-server-blueprint']['remote_file']} to /root/#{filename}"
 
   remote_file "/root/#{filename}" do
-    source "#{node['chef-server-blueprint']['remote_file']}"
+    source node['chef-server-blueprint']['remote_file']
     action :create_if_missing
   end
 
