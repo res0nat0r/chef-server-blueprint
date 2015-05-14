@@ -10,10 +10,10 @@ log "*** in recipe: chef-server-blueprint::chef-ros-restore"
 
 raise "*** ROS gem missing, please add rightscale::install_tools recipes to runlist." unless File.exists?("/opt/rightscale/sandbox/bin/ros_util")
 
-if (("#{node['chef-server-blueprint']['backup']['storage_account_id']}" == "") ||
-    ("#{node['chef-server-blueprint']['backup']['storage_account_secret']}" == "") ||
-    ("#{node['chef-server-blueprint']['backup']['container']}" == "") ||
-    ("#{node['chef-server-blueprint']['backup']['lineage']}" == ""))
+if ((node['chef-server-blueprint']['backup']['storage_account_id'] == "") ||
+    (node['chef-server-blueprint']['backup']['storage_account_secret'] == "") ||
+    (node['chef-server-blueprint']['backup']['container'] == "") ||
+    (node['chef-server-blueprint']['backup']['lineage'] == ""))
   raise "*** Attributes chef-server-blueprint/backup/storage_account_id, storage_account_secret, container and lineage are required by chef-server-blueprint::chef-ros-backup. Aborting"
 end
 
