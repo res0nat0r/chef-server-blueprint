@@ -24,7 +24,7 @@ backup_script = ::File.join(::File.dirname(__FILE__), "..", "files", "default", 
 
 include_recipe "rsc_ros::default"
 
-download_file = File.join(Chef::Config[:file_cache_path]},"chef-backup.tar.bz2")
+download_file = File.join(Chef::Config[:file_cache_path],"chef-backup.tar.bz2")
 
 rsc_ros download_file do
   storage_provider  cloud
