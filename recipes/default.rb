@@ -31,7 +31,7 @@ else
   end
 
   log "*** Setting node['chef-server']['package_file'] to /root/#{filename}"
-  node['chef-server']['package_file']="/root/#{filename}"
+  node.default['chef-server']['package_file'] = "/root/#{filename}"
 end
 p=package "openssl" do
   action :nothing
