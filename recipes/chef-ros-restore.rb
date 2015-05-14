@@ -22,36 +22,31 @@ cloud = node['chef-server-blueprint']['backup']['storage_account_provider']
 prefix = node['chef-server-blueprint']['backup']['lineage']
 backup_script = ::File.join(::File.dirname(__FILE__), "..", "files", "default", "chef-backup.sh")
 
-# Overrides default endpoint or for generic storage clouds such as Swift.
-# Is set as ENV['STORAGE_OPTIONS'] for ros_util.
-require 'json'
+include_recipe "rsc_ros::default"
 
-options =
-  if node['chef-server-blueprint']['backup']['storage_account_endpoint'].to_s.empty?
-    {}
-  else
-    {'STORAGE_OPTIONS' => JSON.dump({
-      :endpoint => node['chef-server-blueprint']['backup']['storage_account_endpoint'],
-      :cloud => node['chef-server-blueprint']['backup']['storage_account_provider'].to_sym
-    })}
-  end
+download_file = File.join(Chef::Config[:file_cache_path]},"chef-backup.tar.bz2")
 
-environment_variables = {
-  'STORAGE_ACCOUNT_ID' => node['chef-server-blueprint']['backup']['storage_account_id'],
-  'STORAGE_ACCOUNT_SECRET' => node['chef-server-blueprint']['backup']['storage_account_secret']
-}.merge(options)
+rsc_ros download_file do
+  storage_provider  cloud
+  access_key        node['chef-server-blueprint']['backup']['storage_account_id']
+  secret_key        node['chef-server-blueprint']['backup']['storage_account_secret']
+  bucket            container
+  file              node['chef-server-blueprint']['backup']['lineage']
+  destination       download_file
+  action            :download
+end
+
 
 bash "*** Downloading latest backup from '#{container}/chef-backups/', cloud #{cloud}" do
   flags "-ex"
   user "root"
   environment environment_variables
   code <<-EOH
-    tmp_dir=`mktemp -d`
-    /opt/rightscale/sandbox/bin/ros_util get --cloud #{cloud}\
-                                             --container #{container}\
-                                             --dest $tmp_dir/chef-backup.tar.bz2\
-                                             --source chef-backups/#{prefix} --latest
+    #/opt/rightscale/sandbox/bin/ros_util get --cloud #{cloud}\
+    #                                         --container #{container}\
+    #                                         --dest $tmp_dir/chef-backup.tar.bz2\
+    #                                         --source chef-backups/#{prefix} --latest
     chmod +x #{backup_script}
-    #{backup_script} --restore $tmp_dir/chef-backup.tar.bz2
+    #{backup_script} --restore #{download_file}
   EOH
 end
