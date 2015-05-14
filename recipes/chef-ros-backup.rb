@@ -8,8 +8,6 @@ end
 
 log "*** in recipe: chef-server-blueprint::chef-ros-backup"
 
-raise "*** ROS gem missing, please add rightscale::install_tools recipes to runlist." unless File.exists?("/opt/rightscale/sandbox/bin/ros_util")
-
 if ((node['chef-server-blueprint']['backup']['storage_account_id'] == "") ||
     (node['chef-server-blueprint']['backup']['storage_account_secret'] == "") ||
     (node['chef-server-blueprint']['backup']['container'] == "") ||
@@ -25,21 +23,6 @@ backup_script = ::File.join(::File.dirname(__FILE__), "..", "files", "default", 
 # Is set as ENV['STORAGE_OPTIONS'] for ros_util.
 require 'json'
 
-options =
-  if node['chef-server-blueprint']['backup']['storage_account_endpoint'].to_s.empty?
-    {}
-  else
-    {'STORAGE_OPTIONS' => JSON.dump({
-      :endpoint => node['chef-server-blueprint']['backup']['storage_account_endpoint'],
-      :cloud => node['chef-server-blueprint']['backup']['storage_account_provider'].to_sym
-    })}
-  end
-
-environment_variables = {
-  'STORAGE_ACCOUNT_ID' => node['chef-server-blueprint']['backup']['storage_account_id'],
-  'STORAGE_ACCOUNT_SECRET' => node['chef-server-blueprint']['backup']['storage_account_secret']
-}.merge(options)
-
 backup_src = "/var/backups/chef-backup/chef-backup.tar.bz2"
 backup_dst = node['chef-server-blueprint']['backup']['lineage'] + "-" + Time.now.strftime("%Y%m%d%H%M") + ".tar.bz2"
 
@@ -50,6 +33,16 @@ bash "*** Uploading '#{backup_src}' to '#{cloud}' container '#{container}/chef-b
   code <<-EOH
     chmod +x #{backup_script}
     #{backup_script} --backup
-    /opt/rightscale/sandbox/bin/ros_util put --container #{container} --cloud #{cloud} --source #{backup_src} --dest "chef-backups/#{backup_dst}"
+    mv #{backup_src} #{backup_dst}
+    #/opt/rightscale/sandbox/bin/ros_util put --container #{container} --cloud #{cloud} --source #{backup_src} --dest "chef-backups/#{backup_dst}"
   EOH
+end
+
+rsc_ros "uploading files" do
+  storage_provider  cloud
+  access_key        node['chef-server-blueprint']['backup']['storage_account_id']
+  secret_key        node['chef-server-blueprint']['backup']['storage_account_secret']
+  bucket            container
+  file              backup_dst
+  action            :upload
 end
