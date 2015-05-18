@@ -17,7 +17,16 @@ end
 
 container = node['chef-server-blueprint']['backup']['container']
 cloud = node['chef-server-blueprint']['backup']['storage_account_provider']
-backup_script = ::File.join(::File.dirname(__FILE__), "..", "files", "default", "chef-backup.sh")
+backup_script = '/usr/local/bin/chef-backup.sh'
+
+cookbook_file backup_script do
+  cookbook "chef-server-blueprint"
+  source "chef-backup.sh"
+  owner "root"
+  group "root"
+  mode 0777
+  action :create
+end
 
 # Overrides default endpoint or for generic storage clouds such as Swift.
 # Is set as ENV['STORAGE_OPTIONS'] for ros_util.
@@ -30,10 +39,8 @@ bash "*** Uploading '#{backup_src}' to '#{cloud}' container '#{container}/chef-b
   flags "-ex"
   user "root"
   code <<-EOH
-    chmod +x #{backup_script}
     #{backup_script} --backup
     mv #{backup_src} #{backup_dst}
-    #/opt/rightscale/sandbox/bin/ros_util put --container #{container} --cloud #{cloud} --source #{backup_src} --dest "chef-backups/#{backup_dst}"
   EOH
 end
 
