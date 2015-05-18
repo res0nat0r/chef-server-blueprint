@@ -3,13 +3,15 @@
 # Author email: scorp.dev.null@gmail.com
 # repo: https://github.com/sc0rp1us/cehf-useful-scripts
 # env and func's
+set -x
+
 _BACKUP_NAME="chef-backup_$(date +%Y-%m-%d)"
 _BACKUP_USER="root"
 _BACKUP_DIR="/var/backups"
 _SYS_TMP="/tmp"
 _TMP="${_SYS_TMP}/${_BACKUP_NAME}"
 _pg_dump(){
-su - opscode-pgsql -c "/opt/chef-server/embedded/bin/pg_dump -c opscode_chef"
+su - opscode-pgsql -c "/opt/opscode/embedded/bin/pg_dump -c opscode_chef"
 }
 syntax(){
         echo ""
@@ -39,8 +41,8 @@ mkdir -p ${_TMP}/postgresql
 mkdir -p ${_BACKUP_DIR}/chef-backup
 
 # Backup files
-cp -a /var/opt/chef-server/nginx/{ca,etc} ${_TMP}/nginx
-cp -a /var/opt/chef-server/bookshelf/data/bookshelf/ ${_TMP}/cookbooks
+cp -a /var/opt/opscode/nginx/{ca,etc} ${_TMP}/nginx
+cp -a /var/opt/opscode/bookshelf/data/bookshelf/ ${_TMP}/cookbooks
 
 # Backup database
 _pg_dump > ${_TMP}/postgresql/pg_opscode_chef.sql
@@ -70,23 +72,23 @@ echo "Restore function"
     set -x
 
     tar xjf ${source} -C ${_TMP_RESTORE}
-        mv /var/opt/chef-server/nginx/ca{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
-        mv /var/opt/chef-server/nginx/etc{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
-        if [[ -d /var/opt/chef-server/bookshelf/data/bookshelf ]]; then
-            mv /var/opt/chef-server/bookshelf/data/bookshelf{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
+        mv /var/opt/opscode/nginx/ca{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
+        mv /var/opt/opscode/nginx/etc{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
+        if [[ -d /var/opt/opscode/bookshelf/data/bookshelf ]]; then
+            mv /var/opt/opscode/bookshelf/data/bookshelf{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
         fi
-        _pg_dump > /var/opt/chef-server/pg_opscode_chef.sql.$(date +%Y-%m-%d_%H:%M:%S).bak
+        _pg_dump > /var/opt/opscode/pg_opscode_chef.sql.$(date +%Y-%m-%d_%H:%M:%S).bak
 
     cd ${_TMP_RESTORE}/*
     _TMP_RESTORE_D=$(pwd)
 
         chef-server-ctl reconfigure
-        su - opscode-pgsql -c "/opt/chef-server/embedded/bin/psql opscode_chef  < ${_TMP_RESTORE_D}/postgresql/pg_opscode_chef.sql"
+        su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP_RESTORE_D}/postgresql/pg_opscode_chef.sql"
         chef-server-ctl stop
 
-        cp -a ${_TMP_RESTORE_D}/nginx/ca/              /var/opt/chef-server/nginx/
-        cp -a ${_TMP_RESTORE_D}/nginx/etc/             /var/opt/chef-server/nginx/
-        cp -a ${_TMP_RESTORE_D}/cookbooks/bookshelf/   /var/opt/chef-server/bookshelf/data/
+        cp -a ${_TMP_RESTORE_D}/nginx/ca/              /var/opt/opscode/nginx/
+        cp -a ${_TMP_RESTORE_D}/nginx/etc/             /var/opt/opscode/nginx/
+        cp -a ${_TMP_RESTORE_D}/cookbooks/bookshelf/   /var/opt/opscode/bookshelf/data/
 
 
         chef-server-ctl start
@@ -98,7 +100,7 @@ echo "Restore function"
 }
 
 # tests
-if [[ ! -x /opt/chef-server/embedded/bin/pg_dump ]];then
+if [[ ! -x /opt/opscode/embedded/bin/pg_dump ]];then
     echo "Use it script only on chef-server V11"
     exit 1
 fi
