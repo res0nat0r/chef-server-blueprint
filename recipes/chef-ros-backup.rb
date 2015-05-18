@@ -29,7 +29,6 @@ backup_dst = node['chef-server-blueprint']['backup']['lineage'] + "-" + Time.now
 bash "*** Uploading '#{backup_src}' to '#{cloud}' container '#{container}/chef-backups/#{backup_dst}'" do
   flags "-ex"
   user "root"
-  environment environment_variables
   code <<-EOH
     chmod +x #{backup_script}
     #{backup_script} --backup

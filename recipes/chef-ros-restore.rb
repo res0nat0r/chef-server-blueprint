@@ -40,7 +40,6 @@ end
 bash "*** Downloading latest backup from '#{container}/chef-backups/', cloud #{cloud}" do
   flags "-ex"
   user "root"
-  environment environment_variables
   code <<-EOH
     #/opt/rightscale/sandbox/bin/ros_util get --cloud #{cloud}\
     #                                         --container #{container}\
