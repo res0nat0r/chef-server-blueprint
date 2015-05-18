@@ -66,16 +66,11 @@ attribute "chef-server-blueprint/backup/storage_account_provider",
     " (complete list of supported storage locations is in input dropdown)." +
     " Example: s3",
   :required => "optional",
+  :default = "aws",
   :choice => [
-    "s3",
-    "Cloud_Files",
-    "Cloud_Files_UK",
+    "aws",
     "google",
-    "azure",
-    "swift",
-    "SoftLayer_Dallas",
-    "SoftLayer_Singapore",
-    "SoftLayer_Amsterdam"
+    "rackspace"
   ],
   :recipes => [
     "chef-server-blueprint::chef-ros-backup",
