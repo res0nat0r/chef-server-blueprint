@@ -6,6 +6,8 @@ marker "recipe_start_rightscale" do
   template "rightscale_audit_entry.erb"
 end
 
+include_recipe "rsc_ros::default"
+
 log "*** in recipe: chef-server-blueprint::chef-ros-restore"
 
 raise "*** ROS gem missing, please add rightscale::install_tools recipes to runlist." unless File.exists?("/opt/rightscale/sandbox/bin/ros_util")

@@ -6,6 +6,8 @@ marker "recipe_start_rightscale" do
   template "rightscale_audit_entry.erb"
 end
 
+include_recipe "rsc_ros::default"
+
 log "*** in recipe: chef-server-blueprint::chef-ros-backup"
 
 if ((node['chef-server-blueprint']['backup']['storage_account_id'] == "") ||
@@ -32,8 +34,9 @@ end
 # Is set as ENV['STORAGE_OPTIONS'] for ros_util.
 require 'json'
 
-backup_src = "/var/backups/chef-backup/chef-backup.tar.bz2"
-backup_dst = node['chef-server-blueprint']['backup']['lineage'] + "-" + Time.now.strftime("%Y%m%d%H%M") + ".tar.bz2"
+backup_dir = '/var/backups/chef-backup'
+backup_src = File.join(backup_dir,'chef-backup.tar.bz2')
+backup_dst = File.join(backup_dir,node['chef-server-blueprint']['backup']['lineage']+ "-" + Time.now.strftime("%Y%m%d%H%M") + ".tar.bz2")
 
 bash "*** Uploading '#{backup_src}' to '#{cloud}' container '#{container}/chef-backups/#{backup_dst}'" do
   flags "-ex"
