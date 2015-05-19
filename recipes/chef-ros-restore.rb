@@ -35,16 +35,19 @@ rsc_ros download_file do
   action            :download
 end
 
+cookbook_file backup_script do
+  cookbook "chef-server-blueprint"
+  source "chef-backup.sh"
+  owner "root"
+  group "root"
+  mode 0777
+  action :create
+end
 
 bash "*** Downloading latest backup from '#{container}/chef-backups/', cloud #{cloud}" do
   flags "-ex"
   user "root"
   code <<-EOH
-    #/opt/rightscale/sandbox/bin/ros_util get --cloud #{cloud}\
-    #                                         --container #{container}\
-    #                                         --dest $tmp_dir/chef-backup.tar.bz2\
-    #                                         --source chef-backups/#{prefix} --latest
-    chmod +x #{backup_script}
     #{backup_script} --restore #{download_file}
   EOH
 end
