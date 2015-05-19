@@ -11,7 +11,7 @@ _BACKUP_DIR="/var/backups"
 _SYS_TMP="/tmp"
 _TMP="${_SYS_TMP}/${_BACKUP_NAME}"
 _pg_dump(){
-su - opscode-pgsql -c "/opt/opscode/embedded/bin/pg_dump_all -c"
+su - opscode-pgsql -c "/opt/opscode/embedded/bin/pg_dumpall -c"
 }
 syntax(){
         echo ""
