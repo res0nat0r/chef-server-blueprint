@@ -52,6 +52,7 @@ cp -a /var/opt/opscode/nginx/{ca,etc} ${_TMP}/nginx
 cp -a /var/opt/opscode/bookshelf/data/bookshelf/ ${_TMP}/cookbooks
 
 # Backup database
+chef-server-ctl start postgresql
 _pg_dump > ${_TMP}/postgresql/pg_opscode_chef.sql
 
 cd ${_SYS_TMP}
