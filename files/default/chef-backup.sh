@@ -11,7 +11,7 @@ _BACKUP_DIR="/var/backups"
 _SYS_TMP="/tmp"
 _TMP="${_SYS_TMP}/${_BACKUP_NAME}"
 _pg_dump(){
-su - opscode-pgsql -c "/opt/opscode/embedded/bin/pg_dump -c opscode_chef"
+su - opscode-pgsql -c "/opt/opscode/embedded/bin/pg_dump_all -c"
 }
 syntax(){
         echo ""
@@ -35,12 +35,19 @@ set -e
 set -x
 # Create folders
 mkdir -p ${_TMP}
+mkdir -p ${_TMP}/files/etc/opscode
+mkdir -p ${_TMP}/files/var/opt/opscode
 mkdir -p ${_TMP}/nginx
 mkdir -p ${_TMP}/cookbooks
 mkdir -p ${_TMP}/postgresql
 mkdir -p ${_BACKUP_DIR}/chef-backup
 
+chef-server-ctl org-list  >> ${_TMP}/orglist.txt
+chef-server-ctl stop
+
 # Backup files
+cp -a /var/opt/opscode ${_TMP}/files/var/opt/opscode
+cp -a /etc/opscode ${_TMP}/files/etc/opscode
 cp -a /var/opt/opscode/nginx/{ca,etc} ${_TMP}/nginx
 cp -a /var/opt/opscode/bookshelf/data/bookshelf/ ${_TMP}/cookbooks
 
@@ -57,6 +64,7 @@ cd ${_SYS_TMP}
 
 
     rm -Rf ${_TMP}
+chef-server-ctl start
 }
 
 
@@ -70,7 +78,7 @@ echo "Restore function"
 
     set -e
     set -x
-
+    chef-server-ctl stop
     tar xjf ${source} -C ${_TMP_RESTORE}
         mv /var/opt/opscode/nginx/ca{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
         mv /var/opt/opscode/nginx/etc{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
@@ -82,9 +90,8 @@ echo "Restore function"
     cd ${_TMP_RESTORE}/*
     _TMP_RESTORE_D=$(pwd)
 
-        chef-server-ctl reconfigure
+        chef-server-ctl start postgresql
         su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP_RESTORE_D}/postgresql/pg_opscode_chef.sql"
-        chef-server-ctl stop
 
         cp -a ${_TMP_RESTORE_D}/nginx/ca/              /var/opt/opscode/nginx/
         cp -a ${_TMP_RESTORE_D}/nginx/etc/             /var/opt/opscode/nginx/
@@ -93,7 +100,11 @@ echo "Restore function"
 
         chef-server-ctl start
         sleep 30
-        chef-server-ctl reindex
+        chef-server-ctl reconfigure
+        sleep 30
+        for i in `cat ${_TMP_RESTORE}/orglist.txt`; do
+          chef-server-ctl reindex $i
+        done
 
         cd ~
         rm -Rf ${_TMP_RESTORE}
