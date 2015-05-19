@@ -10,8 +10,6 @@ include_recipe "rsc_ros::default"
 
 log "*** in recipe: chef-server-blueprint::chef-ros-restore"
 
-raise "*** ROS gem missing, please add rightscale::install_tools recipes to runlist." unless File.exists?("/opt/rightscale/sandbox/bin/ros_util")
-
 if ((node['chef-server-blueprint']['backup']['storage_account_id'] == "") ||
     (node['chef-server-blueprint']['backup']['storage_account_secret'] == "") ||
     (node['chef-server-blueprint']['backup']['container'] == "") ||
@@ -22,8 +20,7 @@ end
 container = node['chef-server-blueprint']['backup']['container']
 cloud = node['chef-server-blueprint']['backup']['storage_account_provider']
 prefix = node['chef-server-blueprint']['backup']['lineage']
-backup_script = ::File.join(::File.dirname(__FILE__), "..", "files", "default", "chef-backup.sh")
-
+backup_script = '/usr/local/bin/chef-backup.sh'
 include_recipe "rsc_ros::default"
 
 download_file = File.join(Chef::Config[:file_cache_path],"chef-backup.tar.bz2")
