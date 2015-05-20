@@ -80,6 +80,7 @@ echo "Restore function"
     set -e
     set -x
     chef-server-ctl stop
+    chef-server-ctl start postgresql
     tar xjf ${source} -C ${_TMP_RESTORE}
         mv /var/opt/opscode/nginx/ca{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
         mv /var/opt/opscode/nginx/etc{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
@@ -91,7 +92,6 @@ echo "Restore function"
     cd ${_TMP_RESTORE}/*
     _TMP_RESTORE_D=$(pwd)
 
-        chef-server-ctl start postgresql
         su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP_RESTORE_D}/postgresql/pg_opscode_chef.sql"
 
         cp -a ${_TMP_RESTORE_D}/nginx/ca/              /var/opt/opscode/nginx/
@@ -108,7 +108,7 @@ echo "Restore function"
         done
 
         cd ~
-        rm -Rf ${_TMP_RESTORE}
+        #rm -Rf ${_TMP_RESTORE}
 }
 
 # tests
