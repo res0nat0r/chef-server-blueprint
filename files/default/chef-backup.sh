@@ -46,8 +46,8 @@ chef-server-ctl org-list  >> ${_TMP}/orglist.txt
 chef-server-ctl stop
 
 # Backup files
-cp -a /var/opt/opscode ${_TMP}/files/var/opt/opscode
-cp -a /etc/opscode ${_TMP}/files/etc/opscode
+cp -a /var/opt/opscode ${_TMP}/files/var/opt
+cp -a /etc/opscode ${_TMP}/files/etc
 cp -a /var/opt/opscode/nginx/{ca,etc} ${_TMP}/nginx
 cp -a /var/opt/opscode/bookshelf/data/bookshelf/ ${_TMP}/cookbooks
 
@@ -94,6 +94,8 @@ echo "Restore function"
 
         su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP_RESTORE_D}/postgresql/pg_opscode_chef.sql"
 
+        cp -a ${_TMP_RESTORE_D}/files/etc/opscode     /etc/
+        cp -a ${_TMP_RESTORE_D}/files/var/opt/opscode   /var/opt
         cp -a ${_TMP_RESTORE_D}/nginx/ca/              /var/opt/opscode/nginx/
         cp -a ${_TMP_RESTORE_D}/nginx/etc/             /var/opt/opscode/nginx/
         cp -a ${_TMP_RESTORE_D}/cookbooks/bookshelf/   /var/opt/opscode/bookshelf/data/
@@ -103,7 +105,7 @@ echo "Restore function"
         sleep 30
         chef-server-ctl reconfigure
         sleep 30
-        for i in `cat ${_TMP_RESTORE}/orglist.txt`; do
+        for i in `cat ${_TMP_RESTORE_D}/orglist.txt`; do
           chef-server-ctl reindex $i
         done
 
