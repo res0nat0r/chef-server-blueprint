@@ -48,6 +48,6 @@ bash "*** Downloading latest backup from '#{container}/chef-backups/', cloud #{c
   flags "-ex"
   user "root"
   code <<-EOH
-    #{backup_script} --restore #{download_file}
+    echo "#{backup_script} --restore #{download_file}" >> /root/backup.sh
   EOH
 end
