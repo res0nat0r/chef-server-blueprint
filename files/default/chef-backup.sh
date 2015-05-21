@@ -9,7 +9,7 @@ _BACKUP_NAME="chef-backup_$(date +%Y-%m-%d)"
 _BACKUP_USER="root"
 _BACKUP_DIR="/var/backups"
 _SYS_TMP="/tmp"
-_TMP="${_SYS_TMP}/${_BACKUP_NAME}"
+_TMP="${_SYS_TMP}/chef-backup/${_BACKUP_NAME}"
 _pg_dump(){
 su - opscode-pgsql -c "/opt/opscode/embedded/bin/pg_dumpall -c"
 }
@@ -45,12 +45,14 @@ chef-server-ctl stop
 # Backup database
 chef-server-ctl start postgresql
 _pg_dump > ${_TMP}/postgresql/pg_opscode_chef.sql
+chef-server-ctl stop postgresql
 
 cd ${_SYS_TMP}
     if [[ -e ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2 ]]; then
         mv ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2{,.previous}
     fi
-    tar -cvfjp ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2 ${_TMP}/postgresql /etc/opscode /var/opt/opscode ${_TMP}/orglist.txt
+
+    tar cvjpf ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2 ${_TMP}/postgresql /etc/opscode /var/opt/opscode ${_TMP}/orglist.txt
     #chown -R ${_BACKUP_USER}:${_BACKUP_USER} ${_BACKUP_DIR}/chef-backup/
     #chmod -R g-rwx,o-rwx ${_BACKUP_DIR}/chef-backup/
 
@@ -71,17 +73,17 @@ echo "Restore function"
     set -x
     chef-server-ctl stop
     chef-server-ctl start postgresql
-    tar xvfjp ${source} --exclude='var/opt/opscode/drbd/data/postgresql_9.2' -C /
+    tar xvjpf ${source} --exclude='var/opt/opscode/drbd/data/postgresql_9.2' -C /
     _pg_dump > /var/opt/opscode/pg_opscode_chef.sql.$(date +%Y-%m-%d_%H:%M:%S).bak
-
-    cd ${_TMP}
-    su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP}/postgresql/pg_opscode_chef.sql"
+    _TMP_RESTORE="${_SYS_TMP}/chef-backups/*"
+    cd ${_TMP_RESTORE}
+    su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP_RESTORE}/postgresql/pg_opscode_chef.sql"
 
         chef-server-ctl start
         sleep 30
 #        chef-server-ctl reconfigure
         sleep 30
-        for i in `cat ${_TMP}/orglist.txt`; do
+        for i in `cat ${_TMP_RESTORE}/orglist.txt`; do
           chef-server-ctl reindex $i
         done
 
