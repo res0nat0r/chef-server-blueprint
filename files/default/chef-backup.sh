@@ -72,8 +72,8 @@ echo "Restore function"
     set -e
     set -x
     chef-server-ctl stop
-    chef-server-ctl start postgresql
     tar xvjpf ${source} --exclude='var/opt/opscode/drbd/data/postgresql_9.2' -C /
+    chef-server-ctl start postgresql
     _pg_dump > /var/opt/opscode/pg_opscode_chef.sql.$(date +%Y-%m-%d_%H:%M:%S).bak
     _TMP_RESTORE="${_SYS_TMP}/chef-backups/*"
     cd ${_TMP_RESTORE}
