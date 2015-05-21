@@ -103,7 +103,7 @@ echo "Restore function"
 
         chef-server-ctl start
         sleep 30
-        chef-server-ctl reconfigure
+#        chef-server-ctl reconfigure
         sleep 30
         for i in `cat ${_TMP_RESTORE_D}/orglist.txt`; do
           chef-server-ctl reindex $i
