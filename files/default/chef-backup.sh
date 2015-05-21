@@ -35,21 +35,12 @@ set -e
 set -x
 # Create folders
 mkdir -p ${_TMP}
-mkdir -p ${_TMP}/files/etc/opscode
-mkdir -p ${_TMP}/files/var/opt/opscode
-mkdir -p ${_TMP}/nginx
-mkdir -p ${_TMP}/cookbooks
 mkdir -p ${_TMP}/postgresql
 mkdir -p ${_BACKUP_DIR}/chef-backup
 
 chef-server-ctl org-list  >> ${_TMP}/orglist.txt
 chef-server-ctl stop
 
-# Backup files
-cp -a /var/opt/opscode ${_TMP}/files/var/opt
-cp -a /etc/opscode ${_TMP}/files/etc
-cp -a /var/opt/opscode/nginx/{ca,etc} ${_TMP}/nginx
-cp -a /var/opt/opscode/bookshelf/data/bookshelf/ ${_TMP}/cookbooks
 
 # Backup database
 chef-server-ctl start postgresql
@@ -59,7 +50,7 @@ cd ${_SYS_TMP}
     if [[ -e ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2 ]]; then
         mv ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2{,.previous}
     fi
-    tar cjf ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2 ${_BACKUP_NAME}
+    tar -cvfjp ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2 ${_TMP}/postgresql /etc/opscode /var/opt/opscode ${_TMP}/orglist.txt
     chown -R ${_BACKUP_USER}:${_BACKUP_USER} ${_BACKUP_DIR}/chef-backup/
     chmod -R g-rwx,o-rwx ${_BACKUP_DIR}/chef-backup/
 
@@ -71,7 +62,6 @@ chef-server-ctl start
 
 _chefRestore(){
 echo "Restore function"
-    _TMP_RESTORE=${_SYS_TMP}/restore ; mkdir -p ${_TMP_RESTORE}
     if [[ ! -f ${source} ]]; then
         echo "ERROR: file ${source} do not exist"
         exit 1
@@ -81,31 +71,17 @@ echo "Restore function"
     set -x
     chef-server-ctl stop
     chef-server-ctl start postgresql
-    tar xjf ${source} -C ${_TMP_RESTORE}
-        mv /var/opt/opscode/nginx/ca{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
-        mv /var/opt/opscode/nginx/etc{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
-        if [[ -d /var/opt/opscode/bookshelf/data/bookshelf ]]; then
-            mv /var/opt/opscode/bookshelf/data/bookshelf{,.$(date +%Y-%m-%d_%H:%M:%S).bak}
-        fi
-        _pg_dump > /var/opt/opscode/pg_opscode_chef.sql.$(date +%Y-%m-%d_%H:%M:%S).bak
+    tar xvfjp ${source} --exclude='var/opt/opscode/drbd/data/postgresql_9.2' -C /
+    _pg_dump > /var/opt/opscode/pg_opscode_chef.sql.$(date +%Y-%m-%d_%H:%M:%S).bak
 
-    cd ${_TMP_RESTORE}/*
-    _TMP_RESTORE_D=$(pwd)
-
-        su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP_RESTORE_D}/postgresql/pg_opscode_chef.sql"
-
-        cp -a ${_TMP_RESTORE_D}/files/etc/opscode     /etc/
-        cp -a ${_TMP_RESTORE_D}/files/var/opt/opscode   /var/opt
-        cp -a ${_TMP_RESTORE_D}/nginx/ca/              /var/opt/opscode/nginx/
-        cp -a ${_TMP_RESTORE_D}/nginx/etc/             /var/opt/opscode/nginx/
-        cp -a ${_TMP_RESTORE_D}/cookbooks/bookshelf/   /var/opt/opscode/bookshelf/data/
-
+    cd ${_TMP}
+    su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP}/postgresql/pg_opscode_chef.sql"
 
         chef-server-ctl start
         sleep 30
 #        chef-server-ctl reconfigure
         sleep 30
-        for i in `cat ${_TMP_RESTORE_D}/orglist.txt`; do
+        for i in `cat ${_TMP}/orglist.txt`; do
           chef-server-ctl reindex $i
         done
 
