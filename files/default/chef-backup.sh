@@ -38,7 +38,7 @@ mkdir -p ${_TMP}
 mkdir -p ${_TMP}/postgresql
 mkdir -p ${_BACKUP_DIR}/chef-backup
 
-chef-server-ctl org-list  >> ${_TMP}/orglist.txt
+chef-server-ctl org-list >> ${_TMP}/orglist.txt
 chef-server-ctl stop
 
 
@@ -51,8 +51,8 @@ cd ${_SYS_TMP}
         mv ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2{,.previous}
     fi
     tar -cvfjp ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2 ${_TMP}/postgresql /etc/opscode /var/opt/opscode ${_TMP}/orglist.txt
-    chown -R ${_BACKUP_USER}:${_BACKUP_USER} ${_BACKUP_DIR}/chef-backup/
-    chmod -R g-rwx,o-rwx ${_BACKUP_DIR}/chef-backup/
+    #chown -R ${_BACKUP_USER}:${_BACKUP_USER} ${_BACKUP_DIR}/chef-backup/
+    #chmod -R g-rwx,o-rwx ${_BACKUP_DIR}/chef-backup/
 
 
     rm -Rf ${_TMP}
