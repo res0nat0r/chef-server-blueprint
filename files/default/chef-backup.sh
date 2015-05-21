@@ -53,8 +53,8 @@ cd ${_SYS_TMP}
     fi
 
     tar cvjpf ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2 ${_TMP}/postgresql /etc/opscode /var/opt/opscode ${_TMP}/orglist.txt
-    #chown -R ${_BACKUP_USER}:${_BACKUP_USER} ${_BACKUP_DIR}/chef-backup/
-    #chmod -R g-rwx,o-rwx ${_BACKUP_DIR}/chef-backup/
+    chown -R ${_BACKUP_USER}:${_BACKUP_USER} ${_BACKUP_DIR}/chef-backup/
+    chmod -R g-rwx,o-rwx ${_BACKUP_DIR}/chef-backup/
 
 
     rm -Rf ${_TMP}

@@ -42,7 +42,7 @@ bash "*** Uploading '#{backup_src}' to '#{cloud}' container '#{container}/chef-b
   flags "-ex"
   user "root"
   code <<-EOH
-#    #{backup_script} --backup
+    #{backup_script} --backup
     mv #{backup_src} #{backup_dst}
   EOH
 end
