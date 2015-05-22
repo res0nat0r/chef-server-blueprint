@@ -92,14 +92,13 @@ echo "Restore function"
     cd ${_TMP_RESTORE}
     su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP_RESTORE}/postgresql/pg_opscode_chef.sql"
 
-        chef-server-ctl start
-        sleep 30
-        for i in `cat ${_TMP_RESTORE}/orglist.txt`; do
-          chef-server-ctl reindex $i
-        done
-
-        cd ~
-        #rm -Rf ${_TMP_RESTORE}
+    chef-server-ctl start
+    sleep 30
+    chef-server-ctl reconfigure
+    sleep 30
+    opscode-manage-ctl reconfigure
+    cd ~
+    rm -Rf ${_TMP_RESTORE}
 }
 
 # tests
