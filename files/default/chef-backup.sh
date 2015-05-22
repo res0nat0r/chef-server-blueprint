@@ -10,9 +10,18 @@ _BACKUP_USER="root"
 _BACKUP_DIR="/var/backups"
 _SYS_TMP="/tmp"
 _TMP="${_SYS_TMP}/chef-backup/${_BACKUP_NAME}"
+
 _pg_dump(){
 su - opscode-pgsql -c "/opt/opscode/embedded/bin/pg_dumpall -c"
 }
+
+pg_running(){
+  while [ `chef-server-ctl status postgresql | cut -d ':' -f 1` == 'down' ]; do
+    echo "pg is down, sleeping 1"
+    sleep 1
+  done
+}
+
 syntax(){
         echo ""
         echo -e "\t$0 --backup                  # for backup"
@@ -44,6 +53,7 @@ chef-server-ctl stop
 
 # Backup database
 chef-server-ctl start postgresql
+pg_running
 _pg_dump > ${_TMP}/postgresql/pg_opscode_chef.sql
 chef-server-ctl stop postgresql
 
@@ -59,6 +69,7 @@ cd ${_SYS_TMP}
 
     rm -Rf ${_TMP}
 chef-server-ctl start
+pg_running
 }
 
 
@@ -74,14 +85,14 @@ echo "Restore function"
     chef-server-ctl stop
     tar xvjpf ${source} --exclude='var/opt/opscode/drbd/data/postgresql_9.2' -C /
     chef-server-ctl start postgresql
+    pg_running
     _pg_dump > /var/opt/opscode/pg_opscode_chef.sql.$(date +%Y-%m-%d_%H:%M:%S).bak
-    _TMP_RESTORE="${_SYS_TMP}/chef-backups/*"
+    ADIR=`ls /tmp/chef-backup/`
+    _TMP_RESTORE="${_SYS_TMP}/chef-backup/$ADIR"
     cd ${_TMP_RESTORE}
     su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP_RESTORE}/postgresql/pg_opscode_chef.sql"
 
         chef-server-ctl start
-        sleep 30
-#        chef-server-ctl reconfigure
         sleep 30
         for i in `cat ${_TMP_RESTORE}/orglist.txt`; do
           chef-server-ctl reindex $i
