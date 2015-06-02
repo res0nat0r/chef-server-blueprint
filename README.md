@@ -10,11 +10,9 @@ Github Repository: https://github.com/RightScale-Services-Cookbooks/chef-server-
 * Requires Chef 11 or higher
 * Requires Ruby 1.9 or higher
 * Platform
-  * RHEL/CentOS 5 64-bit
   * RHEL/CentOS 6 64-bit
-  * Ubuntu 10.04, 10.10 64-bit
-  * Ubuntu 11.04, 11.10 64-bit
-  * Ubuntu 12.04, 12.10 64-bit
+  * Ubuntu 12.04 64-bit
+  * Ubuntu 14.04 64-bit
 * Cookbooks
   * [marker](https://supermarket.chef.io/cookbooks/marker)
   * [packagecloud](https://supermarket.chef.io/cookbooks/packagecloud)
