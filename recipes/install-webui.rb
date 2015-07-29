@@ -1,3 +1,3 @@
-execute "chef-server-ctl install opscode-manage"
-execute "opscode-manage-ctl reconfigure"
-execute "chef-server-ctl reconfigure"
+execute "sudo chef-server-ctl install opscode-manage"
+execute "sudo opscode-manage-ctl reconfigure"
+execute "sudo chef-server-ctl reconfigure"

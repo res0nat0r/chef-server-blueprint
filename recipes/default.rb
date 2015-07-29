@@ -38,37 +38,6 @@ p=package "openssl" do
 end
 p.run_action(:install)
 
-log "*** setting up ssl root certs"
-r=remote_file "/opt/rightscale/sandbox/ssl/certs/ca-bundle.crt" do
-    source "http://curl.haxx.se/ca/cacert.pem"
-    owner "root"
-    group "root"
-    mode "0644"
-    action :nothing
-  end
-r.run_action(:create)
-
-r=remote_file "/etc/pki/tls/certs/ca-bundle.crt" do
-    source "http://curl.haxx.se/ca/cacert.pem"
-    owner "root"
-    group "root"
-    mode "0644"
-    action :nothing
-  end
-r.run_action(:create)
-
-link "/opt/rightscale/sandbox/ssl/cert.pem" do
-  to "/opt/rightscale/sandbox/ssl/certs/ca-bundle.crt"
-end
-
-c=cookbook_file "/etc/profile.d/ssl.sh" do
-  source "ssl.sh"
-  owner "root"
-  group "root"
-  mode 0777
-end
-c.run_action(:create)
-
 cookbook_file "/etc/profile.d/chef.sh" do
   source "profile.sh"
   owner "root"
@@ -76,9 +45,6 @@ cookbook_file "/etc/profile.d/chef.sh" do
   mode 0777
   action :create
 end
-
-log "*** calling packagecloud"
-#include_recipe "packagecloud::default"
 
 log "*** Including recipe chef-server::default"
 include_recipe "chef-server::default"

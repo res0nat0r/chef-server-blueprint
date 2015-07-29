@@ -8,7 +8,7 @@ version          '0.1.7'
 
 depends "marker"
 depends "packagecloud"
-depends "chef-server"
+depends "chef-server", '= 3.0.1'
 depends "rsc_ros", ">= 0.2.1"
 
 # Support everything the chef-server cookbook supports
