@@ -2,4 +2,5 @@ site :opscode
 
 metadata
 
-cookbook 'rsc_ros', git: "https://github.com/RightScale-Services-Cookbooks/rsc_ros.git"
+cookbook 'rs-storage', github:'cdwilhelm/rs-storage',branch: 'curt-dev'
+cookbook 'rsc_ros', github: "RightScale-Services-Cookbooks/rsc_ros"
