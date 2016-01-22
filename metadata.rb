@@ -4,12 +4,12 @@ maintainer_email 'me@ryangeyer.com'
 license          'All rights reserved'
 description      'Installs/Configures chef-server-blueprint'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '0.1.7'
+version          '0.2.0'
 
 depends "marker"
 depends "packagecloud"
-depends "chef-server", '= 3.0.1'
-depends "rsc_ros", ">= 0.2.1"
+depends "chef-server", '~> 4.0.1'
+depends "rsc_ros", "~> 0.2.1"
 
 # Support everything the chef-server cookbook supports
 %w{ ubuntu redhat centos fedora amazon scientific oracle }.each do |os|
