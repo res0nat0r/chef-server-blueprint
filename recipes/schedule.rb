@@ -20,6 +20,6 @@ end
 cron "Chef Server Backup" do
   minute schedule_minute
   hour schedule_hour
-  command "sudo rsc rl10 run_right_script /rll/run/right_script 'RL10 Chef Server Backup'"
+  command "sudo rsc rl10 run_right_script /rll/run/right_script 'rights_cript=RL10 Chef Server Backup'"
   action schedule_enable ? :create : :delete
 end
