@@ -18,7 +18,7 @@ end
 
 # Adds or removes the crontab entry for backup schedule based on rs-mysql/schedule/enable
 cron "backup_schedule_#{lineage}" do
-  minute schedule_mintue
+  minute schedule_minute
   hour schedule_hour
   command "sudo rsc rl10 run_right_script /rll/run/right_script 'Chef Server Backup'"
   action schedule_enable ? :create : :delete
