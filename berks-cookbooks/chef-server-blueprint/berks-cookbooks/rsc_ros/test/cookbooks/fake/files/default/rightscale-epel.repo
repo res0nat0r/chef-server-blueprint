@@ -1,0 +1,9 @@
+[rightscale-epel]
+name = none
+baseurl = http://island10.rightscale.com/rightscale_software/epel/6/x86_64/archive/20150426
+failovermethod=priority
+gpgcheck=1
+enabled=1
+gpgkey=
+# set metadata to expire faster then main
+metadata_expire=30

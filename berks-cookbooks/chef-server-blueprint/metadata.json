@@ -1,0 +1,192 @@
+{
+  "name": "chef-server-blueprint",
+  "description": "Installs/Configures chef-server-blueprint",
+  "long_description": "chef-server-blueprint Cookbook\n==============================\nThis is a thin wrapper around chef-server::default which allows me to pass in attribute overrides through RightScale.  I.E. It specifies a couple attributes in the metadata.rb so that RightScale can parse it and present it to the user. Also contains chef-server backup and restore recipes.\n\nRequirements\n------------\n\n#### Platform\nAll the same ones chef-server supports\n\n#### Cookbooks\n- `chef-server` - Like I said, this is just a thin wrapper.\n\nRecipes\n----------\n<table>\n  <tr>\n    <th>name</th>\n    <th>Description</th>\n  </tr>\n  <tr>\n    <td><tt>default</tt></td>\n    <td>Thin wrapper around chef-server::default which allows me to pass in attribute overrides through RightScale</td>\n  </tr>\n  <tr>\n    <td><tt>chef-ros-backup</tt></td>\n    <td>Backup chef server to Remote Object Storage(ex: AWS S3, RackSpace CloudFiles, etc)</td>\n  </tr>\n  <tr>\n    <td><tt>chef-ros-restore</tt></td>\n    <td>Restore chef server from a  Remote Object Storage(ex: AWS S3, RackSpace CloudFiles, etc) backup</td>\n  </tr>\n  <tr>\n    <td><tt>backup_schedule_enable</tt></td>\n    <td>Enables chef-server-blueprint::chef-ros-backup to be run hourly.</td>\n  </tr>\n  <tr>\n    <td><tt>backup_schedule_disable</tt></td>\n    <td>Disables chef-server-blueprint::chef-ros-backup from being run hourly.</td>\n  </tr>\n</table>\n\n\nAttributes\n----------\n\nIt's in the metadata, which is the whole purpose of this cookbook, but...\n\n#### chef-server-blueprint::default\n<table>\n  <tr>\n    <th>Key</th>\n    <th>Type</th>\n    <th>Description</th>\n    <th>Default</th>\n  </tr>\n  <tr>\n    <td><tt>['chef-server-blueprint']['api_fqdn']</tt></td>\n    <td>String</td>\n    <td>FQDN for the Web UI and API</td>\n    <td><tt>none</tt></td>\n  </tr>\n  <tr>\n    <td><tt>['chef-server-blueprint']['version']</tt></td>\n    <td>String</td>\n    <td>Chef Server Version</td>\n    <td><tt>:latest</tt></td>\n  </tr>\n  <tr>\n    <td><tt>['chef-server-blueprint']['remote_file']</tt></td>\n    <td>String</td>\n    <td>Chef Server Binary URL</td>\n    <td><tt>none</tt></td>\n  </tr>\n</table>\n\nUsage\n-----\n#### chef-server-blueprint::default\nJust include `chef-server-blueprint` in your node's `run_list`:\n\n```json\n{\n  \"name\":\"my_node\",\n  \"run_list\": [\n    \"recipe[chef-server-blueprint]\"\n  ]\n}\n```\n\nContributing\n------------\n\n1. Fork the repository on Github\n2. Create a named feature branch (like `add_component_x`)\n3. Write you change\n4. Write tests for your change (if applicable)\n5. Run the tests, ensuring they all pass\n6. Submit a Pull Request using Github\n\nLicense and Authors\n-------------------\nAuthors:\n- Author:: Ryan J. Geyer (me@ryangeyer.com)\n",
+  "maintainer": "Ryan J. Geyer",
+  "maintainer_email": "me@ryangeyer.com",
+  "license": "All rights reserved",
+  "platforms": {
+    "ubuntu": ">= 0.0.0",
+    "redhat": ">= 0.0.0",
+    "centos": ">= 0.0.0",
+    "fedora": ">= 0.0.0",
+    "amazon": ">= 0.0.0",
+    "scientific": ">= 0.0.0",
+    "oracle": ">= 0.0.0"
+  },
+  "dependencies": {
+    "marker": ">= 0.0.0",
+    "packagecloud": ">= 0.0.0",
+    "chef-server": "~> 4.0.0",
+    "rsc_ros": "~> 0.2.1"
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+    "chef-server-blueprint/api_fqdn": {
+      "display_name": "Chef Server FQDN",
+      "required": "required",
+      "recipes": [
+        "chef-server-blueprint::default"
+      ],
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "chef-server-blueprint/version": {
+      "display_name": "Chef Server Version",
+      "required": "optional",
+      "default": "12.0.8-1.el6",
+      "recipes": [
+        "chef-server-blueprint::default"
+      ],
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "chef-server-blueprint/remote_file": {
+      "display_name": "Chef Server URL",
+      "description": "Instead of specifying the Chef Server Version, you can provide a URL to a chef-server binary to be downloaded and installed. Ex: http://opscode-omnibus-packages.s3.amazonaws.com/el/6/x86_64/chef-server-11.0.12-1.el6.x86_64.rpm",
+      "required": "optional",
+      "recipes": [
+        "chef-server-blueprint::default"
+      ],
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "chef-server-blueprint/backup/lineage": {
+      "display_name": "Chef Server Backup Lineage",
+      "description": "The prefix that will be used to name/locate the backup of a particular VPN server. Example: text: companyx_certs",
+      "required": "optional",
+      "recipes": [
+        "chef-server-blueprint::chef-ros-backup",
+        "chef-server-blueprint::chef-ros-restore",
+        "chef-server-blueprint::backup_schedule_enable"
+      ],
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "chef-server-blueprint/backup": {
+      "display_name": "Import/export settings for database dump file management.",
+      "type": "hash",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "required": "optional",
+      "recipes": [
+
+      ]
+    },
+    "chef-server-blueprint/backup/storage_account_provider": {
+      "display_name": "Dump Storage Account Provider",
+      "description": "Location where the dump file will be saved. Used by dump recipes to back up to remote object storage (complete list of supported storage locations is in input dropdown). Example: s3",
+      "required": "optional",
+      "default": "aws",
+      "choice": [
+        "aws",
+        "google",
+        "rackspace"
+      ],
+      "recipes": [
+        "chef-server-blueprint::chef-ros-backup",
+        "chef-server-blueprint::chef-ros-restore",
+        "chef-server-blueprint::backup_schedule_enable"
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "chef-server-blueprint/backup/storage_account_id": {
+      "display_name": "Chef Server Backup Storage Account ID",
+      "description": "In order to write the Chef Server backup file to the specified cloud storage location, you need to provide cloud authentication credentials. For Amazon S3, use your Amazon access key ID (e.g., cred:AWS_ACCESS_KEY_ID). For Rackspace Cloud Files, use your Rackspace login username (e.g., cred:RACKSPACE_USERNAME). For OpenStack Swift the format is: 'tenantID:username'. Example: cred:AWS_ACCESS_KEY_ID",
+      "required": "optional",
+      "recipes": [
+        "chef-server-blueprint::chef-ros-backup",
+        "chef-server-blueprint::chef-ros-restore",
+        "chef-server-blueprint::backup_schedule_enable"
+      ],
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "chef-server-blueprint/backup/storage_account_secret": {
+      "display_name": "Chef Server Backup Storage Account Secret",
+      "description": "In order to write the Chef Server backup file to the specified cloud storage location, you need to provide cloud authentication credentials. For Amazon S3, use your AWS secret access key (e.g., cred:AWS_SECRET_ACCESS_KEY). For Rackspace Cloud Files, use your Rackspace account API key (e.g., cred:RACKSPACE_AUTH_KEY). Example: cred:AWS_SECRET_ACCESS_KEY",
+      "required": "optional",
+      "recipes": [
+        "chef-server-blueprint::chef-ros-backup",
+        "chef-server-blueprint::chef-ros-restore",
+        "chef-server-blueprint::backup_schedule_enable"
+      ],
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "chef-server-blueprint/backup/storage_account_endpoint": {
+      "display_name": "Chef Server Backup Storage Endpoint URL",
+      "description": "The endpoint URL for the storage cloud. This is used to override the default endpoint or for generic storage clouds such as Swift. Example: http://endpoint_ip:5000/v2.0/tokens",
+      "required": "optional",
+      "default": "",
+      "recipes": [
+        "chef-server-blueprint::chef-ros-backup",
+        "chef-server-blueprint::chef-ros-restore",
+        "chef-server-blueprint::backup_schedule_enable"
+      ],
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "chef-server-blueprint/backup/container": {
+      "display_name": "Chef Server Backup Container",
+      "description": "The cloud storage location where the dump file will be saved to or restored from. For Amazon S3, use the bucket name. For Rackspace Cloud Files, use the container name. Example: db_dump_bucket",
+      "required": "optional",
+      "recipes": [
+        "chef-server-blueprint::chef-ros-backup",
+        "chef-server-blueprint::chef-ros-restore",
+        "chef-server-blueprint::backup_schedule_enable"
+      ],
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    }
+  },
+  "groupings": {
+  },
+  "recipes": {
+    "chef-server-blueprint::default": "Same as chef-server::default, but with inputs and optional package download",
+    "chef-server-blueprint::chef-ros-backup": "Backup chef server to Remote Object Storage(ex: AWS S3, RackSpace CloudFiles, etc)",
+    "chef-server-blueprint::chef-ros-restore": "Restore chef server from a  Remote Object Storage(ex: AWS S3, RackSpace CloudFiles, etc) backup",
+    "chef-server-blueprint::backup_schedule_enable": "Enables chef-server-blueprint::chef-ros-backup to be run hourly.",
+    "chef-server-blueprint::backup_schedule_disable": "Disables chef-server-blueprint::chef-ros-backup from being run hourly.",
+    "chef-server-blueprint::install-webui": "installs webui"
+  },
+  "version": "0.2.0",
+  "source_url": "",
+  "issues_url": ""
+}

@@ -1,0 +1,52 @@
+---
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_solo
+
+platforms:
+  - name: ubuntu-14.04
+  - name: centos-6.5
+    run_list:
+      - recipe[fake::install_rightscale_epel]
+
+suites:
+  - name: aws
+    run_list:
+      - recipe[rsc_ros::default]
+      - recipe[rsc_ros::download]
+    attributes:
+      rsc_ros:
+        storage_provider: "AWS"
+        access_key: <%= ENV['AWS_ACCESS_KEY'] %>
+        secret_key: <%= ENV['AWS_SECRET_KEY'] %>
+        bucket: "rightscale-services"
+        file: "kitchen/docs.tar.bz2"
+        destination: "/tmp/archive_download.tar.bz2"
+
+  - name: google
+    run_list:
+      - recipe[rsc_ros::default]
+      - recipe[rsc_ros::download]
+    attributes:
+      rsc_ros:
+        storage_provider: "google"
+        access_key: <%= ENV['GOOGLE_ACCESS_KEY'] %>
+        secret_key: <%= ENV['GOOGLE_SECRET_KEY'] %>
+        bucket: "rightscale-services"
+        file: "kitchen/docs.tar.bz2"
+        destination: "/tmp/archive_download.tar.bz2"
+
+  - name: rackspace
+    run_list:
+      - recipe[rsc_ros::default]
+      - recipe[rsc_ros::download]
+    attributes:
+      rsc_ros:
+        storage_provider: "rackspace"
+        access_key: <%= ENV['RACKSPACE_USERNAME'] %>
+        secret_key: <%= ENV['RACKSPACE_API_KEY'] %>
+        bucket: "rightscale-services"
+        file: "kitchen/docs.tar.bz2"
+        destination: "/tmp/archive_download.tar.bz2"

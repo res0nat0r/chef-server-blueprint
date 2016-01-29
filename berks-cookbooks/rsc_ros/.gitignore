@@ -1,0 +1,16 @@
+.vagrant
+/cookbooks
+.gems
+.rbenv-gemsets
+
+# Bundler
+bin/*
+.bundle/*
+Gemfile.lock
+
+# Berkshelf
+Berksfile.lock
+
+# Kitchen
+.kitchen/
+.kitchen.local.yml

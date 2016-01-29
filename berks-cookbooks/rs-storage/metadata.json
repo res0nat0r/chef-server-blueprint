@@ -1,0 +1,331 @@
+{
+  "name": "rs-storage",
+  "description": "Provides recipes for managing volumes on a Server in a RightScale supported cloud",
+  "long_description": "# rs-storage cookbook\n\n[![Release](https://img.shields.io/github/release/rightscale-cookbooks/rs-storage.svg?style=flat)][release]\n[![Build Status](https://img.shields.io/travis/rightscale-cookbooks/rs-storage.svg?style=flat)][travis]\n\n[release]: https://github.com/rightscale-cookbooks/rs-storage/releases/latest\n[travis]: https://travis-ci.org/rightscale-cookbooks/rs-storage\n\nProvides recipes for managing volumes on a Server in a RightScale supported cloud which include:\n\n* Creation of single and multi-stripe volumes\n* Taking backups of volumes\n* Restoring from backups\n* Schedule periodic backups\n* Detaching and deleting volumes when server is decommissioned.\n\nGithub Repository: [https://github.com/rightscale-cookbooks/rs-storage](https://github.com/rightscale-cookbooks/rs-storage)\n\n# Requirements\n\n* Requires Chef 11 or higher\n* Requires Ruby 1.9 of higher\n* Platform\n  * Ubuntu 12.04\n  * CentOS 6\n* Cookbooks\n  * [chef_handler](http://community.opscode.com/cookbooks/chef_handler)\n  * [filesystem](http://community.opscode.com/cookbooks/filesystem)\n  * [lvm](http://community.opscode.com/cookbooks/lvm)\n  * [marker](http://community.opscode.com/cookbooks/marker)\n  * [rightscale_volume](http://community.opscode.com/cookbooks/rightscale_volume)\n  * [rightscale_backup](http://community.opscode.com/cookbooks/rightscale_backup)\n\n# Usage\n\n## Creating a new volume\n\nTo create a new volume, run the `rs-storage::volume` recipe with the following attributes set:\n\n- `node['rs-storage']['device']['nickname']` - the nickname of the volume\n- `node['rs-storage']['device']['volume_size']` - the size of the volume to create\n- `node['rs-storage']['device']['filesystem']` - the filesystem to use on the volume\n- `node['rs-storage']['device']['mount_point']` - the location to mount the volume\n\nThis will create a new volume, attach it to the server, format it with the filesystem specified, and mount it on the\nlocation specified.\n\n### Provisioned IOPS on EC2\n\nTo create a volume with IOPS on EC2, set the following attribute before running `rs-storage::volume` recipe:\n\n- `node['rs-storage']['device']['iops']` - the value of IOPS to use\n\n## Creating a logical volume with striping\n\nTo create a logical volume with striping using LVM, run the `rs-storage::stripe` recipe with the following attributes\nset:\n\n- `node['rs-storage']['device']['nickname']` - the nickname to use as prefix for the logical volume\n- `node['rs-storage']['device']['count']` - number of volumes to create in the logical volume\n- `node['rs-storage']['device']['volume_size']` - the total size of the logical volume\n- `node['rs-storage']['device']['filesystem']` - the filesystem to use on the logical volume\n- `node['rs-storage']['device']['mount_point']` - the location to mount the logical volume\n\nThis will create the number of volumes specified in `node['rs-storage']['device']['count']`. Each volume created\nwill have a nickname of `\"#{nickname}_#{stripe_number}\"`. The size for each volume is calculated by the following\nformula:\n\n```ruby\n(total_size.to_f / device_count.to_f).ceil\n\n# For example, total size = 10, stripe count = 3\n(10.0 / 3.0).ceil\n# => 4.0\n```\n\nThis will create a volume group with the name `\"#{nickname}-vg\"` and a logical volume in it with the name\n`\"#{nickname}-lv\"`, format it with the filesystem specified, and mount it on the location specified.\n\n## Backing up volume(s) & Cleaning up backups\n\nTo create a backup of all volumes attached to the server, run the `rs-storage::backup` recipe with the following\nattributes set:\n\n- `node['rs-storage']['backup']['lineage']` - the lineage to be used for the backup\n\nThe backup process will create a snapshot of all volumes attached to the server (except the boot disk if there is one).\nThe backup recipe also handles the cleanup of old volume snapshots and accepts the following attributes:\n\n- `node['rs-storage']['backup']['keep']['keep_last']` - number of last backups to keep from deleting\n- `node['rs-storage']['backup']['keep']['dailies']` - number of daily backups to keep\n- `node['rs-storage']['backup']['keep']['weeklies']` - number of weekly backups to keep\n- `node['rs-storage']['backup']['keep']['monthlies']` - number of monthly backups to keep\n- `node['rs-storage']['backup']['keep']['yearlies']` - number of yearly backups to keep\n\nThis will cleanup the old snapshots on the cloud based on the criteria specified.\n\n## Restoring a volume from a backup\n\nTo restore a volume from backup, run the `rs-storage::volume` recipe with the same set of attributes mentioned in the\n[previous section](#creating-a-new-volume) along with the following attribute:\n\n- `node['rs-storage']['restore']['lineage']` - the lineage to restore the backup from\n\nThis will restore the volume from the backup instead of creating a new one. By default, the backup with the latest\ntimestamp will be restored. To restore a backup from a specific timestamp, set the following attribute:\n\n- `node['rs-storage']['restore']['timestamp']` - the timestamp of the backup to restore from (in seconds since UNIX\n  epoch)\n\n## Restoring a logical volume composed of multiple volumes from a backup\n\nTo restore a logical volume composed of multiple volumes from a backup, run the `rs-storage::stripe` recipe with the\nsame set of attributes mentioned in the [previous section](#creating-stripe-of-volumes) along with the following\nattribute:\n\n- `node['rs-storage']['restore']['lineage']` - the lineage to restore the backup from\n\nThis will restore multiple volumes from the backup matching the lineage. By default, the backup with the latest\ntimestamp will be restored. To restore backup from a specific timestamp, set the following attribute:\n\n- `node['rs-storage']['restore']['timestamp']` - the timestamp of the backup to restore from (in seconds since UNIX\n  epoch)\n\n## Scheduling automated backups of volume(s)\n\nTo schedule automated backups, run the `rs-storage::schedule` recipe with the following attributes set:\n\n- `node['rs-storage']['schedule']['enable']` - to enable/disable automated backups\n- `node['rs-storage']['schedule']['hour']` - the hour to take the backup on (should use crontab syntax)\n- `node['rs-storage']['schedule']['minute']` - the minute to take the backup on (should use crontab syntax)\n- `node['rs-storage']['backup']['lineage']` - the lineage name to be used for the backup\n\nThis will create a crontab entry to run the `rs-storage::backup` recipe periodically at the given minute and hour. To\ndisable the automated backups, simply set `node['rs-storage']['schedule']['enable']` to `false` and rerun the\n`rs-storage::schedule` recipe and this will remove the crontab entry.\n\n## Deleting volume(s)\n\nThis operation should be part of the decommission bundle in a RightScale ServerTemplate where the volumes attached to\nthe server are detached and deleted from the cloud but this can also be used as an operational recipe. This recipe will\ndo nothing in the following conditions:\n\n- when the server enters a stop state\n- when the server reboots\n\nThis recipe also has a safety attribute `node['rs-storage']['device']['destroy_on_decommission']`. This attribute will\nbe set to `false` by default and should be overridden and set to `true` in order for the devices to be detached and\ndeleted. If an LVM is found (created using `rs-storage::stripe`), the LVM will be conditionally removed before detaching\nthe volume.\n\n# Attributes\n\n- `node['rs-storage']['device']['nickname']` - The nickname for the device or the logical volume comprising multiple of\n  devices. Default is `'data_storage'`.\n- `node['rs-storage']['device']['mount_point']` - The mount point for the device. Default is `'/mnt/storage'`.\n- `node['rs-storage']['device']['volume_size']` - The size (in gigabytes) of the volume to be created. If multiple\n  devices are used, this will be the total size of the logical volume. Default is `10`.\n- `node['rs-storage']['device']['count']` - The number of devices to be created for the logical volume. Default is `2`.\n- `node['rs-storage']['device']['iops']` - The IOPS value to be used for EC2 Provisioned IOPS. This attribute should\n  only be used with Amazon EC2. Default is `nil`.\n- `node['rs-storage']['device']['filesystem']` - The filesystem to be used on the device. Default is `'ext4'`.\n- `node['rs-storage']['device']['detach_timeout']` - Amount of time (in seconds) to wait for a volume to detach during\n  the decommission of the server. Default is `300` (5 minutes).\n- `node['rs-storage']['device']['destroy_on_decommission']` - Whether to destroy the device during the decommission of\n  the server. Default is `false`.\n- `node['rs-storage']['device']['mkfs_options']` - Additional mkfs options for formatting the device. Default is `'-F'`\n  which is required to avoid warnings about formatting the whole device.\n- `node['rs-storage']['device']['stripe_size']` - The stripe size to use on LVM. Default is `512`.\n- `node['rs-storage']['backup']['lineage']` - The backup lineage. Default is `nil`.\n- `node['rs-storage']['backup']['keep']['keep_last']` - Maximum snapshots to keep. Default is `60`.\n- `node['rs-storage']['backup']['keep']['dailies']` - Number of daily backups to keep. Default is `14`.\n- `node['rs-storage']['backup']['keep']['weeklies']` - Number of weekly backups to keep. Default is `6`.\n- `node['rs-storage']['backup']['keep']['monthlies']` - Number of monthly backups to keep. Default is `12`.\n- `node['rs-storage']['backup']['keep']['yearlies']` - Number of yearly backups to keep. Default is `2`.\n- `node['rs-storage']['restore']['lineage']` - The name of the lineage to restore the backups from. Default is `nil`.\n- `node['rs-storage']['restore']['timestamp']` - The timestamp to restore backup taken on or before the timestamp in the\n  same lineage. Default is `nil`.\n- `node['rs-storage']['schedule']['enable']` - Enable/disable automated backups. Default is `false`.\n- `node['rs-storage']['schedule']['hour']` - The backup schedule hour. Default is `nil`.\n- `node['rs-storage']['schedule']['minute']` - The backup schedule minute. Default is `nil`.\n\n\n# Recipes\n\n## `rs-storage::default`\n\nSimply includes the `rightscale_volume::default` and `rightscale_backup::default` recipes to meet the requirements of\nusing the resources in these cookbooks.\n\n## `rs-storage::volume`\n\nCreates a new volume from scratch or from an existing backup based on the value provided in the\n`node['rs-storage']['restore']['lineage']` attribute. If this attribute is set, the volume will be restored from a\nbackup matching this lineage otherwise a new volume will be created from scratch. This recipe will also format the\nvolume using the filesystem specified in `node['rs-storage']['device']['filesystem']` and mount the volume on the\nlocation specified in `node['rs-storage']['device']['mount_point']`.\n\n## `rs-storage::stripe`\n\nCreates a new logical volume composed of volumes from scratch or from an existing backup based on the value provided in\nthe `node['rs-storage']['restore']['lineage']` attribute. If this attribute is set, the volumes will be restored from a\nbackup matching this lineage otherwise a new logical volume composed of volumes will be created from scratch. This\nrecipe will create a striped logical volume using LVM on the volumes and format the logical volume using the filesystem\nspecified in `node['rs-storage']['device']['filesystem']`. This will also mount the volume on the location specified in\n`node['rs-storage']['device']['mount_point']`.\n\n## `rs-storage::backup`\n\nTakes a backup of all volumes attached to the server (except boot disks if there are any) with the lineage specified\nin the `node['rs-storage']['backup']['lineage']` attribute. During the backup process, the filesystem will be frozen.i\nThe filesystem will be unfrozen even if the backup process fails with the help of a chef exception handler. This recipe\nwill also clean up the volume snapshots based on the criteria specified in the `rs-storage/backup/keep/*` attributes.\n\n## `rs-storage::schedule`\n\nAdds or removes the crontab entry for taking backups periodically at the minute and hour provided via\n`node['rs-storage']['schedule']['minute']` and `node['rs-storage']['schedule']['hour']` attributes. The recipe uses the\n`node['rs-storage']['schedule']['enable']` attribute to determine wheter to add or remove the crontab entry.\n\n## `rs-storage::decommission`\n\nIf the `node['rs-storage']['device']['destroy_on_decommission']` attribute is set to true, this recipe detaches and\ndeletes the volumes attached to the server. This operation will be skipped if the server is entering the stop state or\nrebooting.\n\n# Author\n\nAuthor:: RightScale, Inc. (<cookbooks@rightscale.com>)\n",
+  "maintainer": "RightScale, Inc.",
+  "maintainer_email": "cookbooks@rightscale.com",
+  "license": "Apache 2.0",
+  "platforms": {
+  },
+  "dependencies": {
+    "chef_handler": "~> 1.1.6",
+    "filesystem": "~> 0.10.0",
+    "lvm": "~> 1.3.6",
+    "marker": "~> 1.0.1",
+    "rightscale_backup": "~> 1.1.8",
+    "rightscale_volume": "~> 1.2.10"
+  },
+  "recommendations": {
+  },
+  "suggestions": {
+  },
+  "conflicting": {
+  },
+  "providing": {
+  },
+  "replacing": {
+  },
+  "attributes": {
+    "rs-storage/device/count": {
+      "display_name": "Device Count",
+      "description": "The number of devices to create and use in the Logical Volume. If this value is set to more than 1, it will create the specified number of devices and create an LVM on the devices.",
+      "default": "2",
+      "recipes": [
+        "rs-storage::stripe",
+        "rs-storage::decommission"
+      ],
+      "required": "recommended",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/device/mount_point": {
+      "display_name": "Device Mount Point",
+      "description": "The mount point to mount the device on. Example: /mnt/storage",
+      "default": "/mnt/storage",
+      "recipes": [
+        "rs-storage::volume",
+        "rs-storage::stripe",
+        "rs-storage::decommission"
+      ],
+      "required": "recommended",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/device/nickname": {
+      "display_name": "Device Nickname",
+      "description": "Nickname for the device. rs-storage::volume uses this for the filesystem label, which is restricted to 12 characters.  If longer than 12 characters, the filesystem label will be set to the first 12 characters. Example: data_storage",
+      "default": "data_storage",
+      "recipes": [
+        "rs-storage::volume",
+        "rs-storage::stripe",
+        "rs-storage::decommission"
+      ],
+      "required": "recommended",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/device/volume_size": {
+      "display_name": "Device Volume Size",
+      "description": "Size of the volume or logical volume to create (in GB). Example: 10",
+      "default": "10",
+      "recipes": [
+        "rs-storage::volume",
+        "rs-storage::stripe"
+      ],
+      "required": "recommended",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/device/iops": {
+      "display_name": "Device IOPS",
+      "description": "IO Operations Per Second to use for the device. Currently this value is only used on AWS clouds. Example: 100",
+      "recipes": [
+        "rs-storage::volume",
+        "rs-storage::stripe"
+      ],
+      "required": "optional",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/device/volume_type": {
+      "display_name": "Volume Type",
+      "description": "Volume Type to use for creating volumes. Example: gp2",
+      "recipes": [
+        "rs-storage::volume",
+        "rs-storage::stripe"
+      ],
+      "required": "optional",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/device/filesystem": {
+      "display_name": "Device Filesystem",
+      "description": "The filesystem to be used on the device. Defaults are based on OS and determined in attributes/defaults.rb. Example: ext4",
+      "recipes": [
+        "rs-storage::volume",
+        "rs-storage::stripe"
+      ],
+      "required": "optional",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/device/detach_timeout": {
+      "display_name": "Detach Timeout",
+      "description": "Amount of time (in seconds) to wait for a single volume to detach at decommission. Example: 300",
+      "default": "300",
+      "recipes": [
+        "rs-storage::volume",
+        "rs-storage::stripe"
+      ],
+      "required": "optional",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/device/destroy_on_decommission": {
+      "display_name": "Destroy on Decommission",
+      "description": "If set to true, the devices will be destroyed on decommission.",
+      "default": "false",
+      "recipes": [
+        "rs-storage::decommission"
+      ],
+      "required": "recommended",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/backup/lineage": {
+      "display_name": "Backup Lineage",
+      "description": "The backup lineage. Example: production",
+      "recipes": [
+        "rs-storage::backup"
+      ],
+      "required": "required",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/restore/lineage": {
+      "display_name": "Restore Lineage",
+      "description": "The lineage name to restore backups. Example: staging",
+      "recipes": [
+        "rs-storage::volume",
+        "rs-storage::stripe"
+      ],
+      "required": "recommended",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/restore/timestamp": {
+      "display_name": "Restore Timestamp",
+      "description": "The timestamp (in seconds since UNIX epoch) to select a backup to restore from. The backup selected will have been created on or before this timestamp. Example: 1391473172",
+      "recipes": [
+        "rs-storage::volume",
+        "rs-storage::stripe"
+      ],
+      "required": "recommended",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/backup/keep/dailies": {
+      "display_name": "Backup Keep Dailies",
+      "description": "Number of daily backups to keep. Example: 14",
+      "default": "14",
+      "recipes": [
+        "rs-storage::backup"
+      ],
+      "required": "optional",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/backup/keep/weeklies": {
+      "display_name": "Backup Keep Weeklies",
+      "description": "Number of weekly backups to keep. Example: 6",
+      "default": "6",
+      "recipes": [
+        "rs-storage::backup"
+      ],
+      "required": "optional",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/backup/keep/monthlies": {
+      "display_name": "Backup Keep Monthlies",
+      "description": "Number of monthly backups to keep. Example: 12",
+      "default": "12",
+      "recipes": [
+        "rs-storage::backup"
+      ],
+      "required": "optional",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/backup/keep/yearlies": {
+      "display_name": "Backup Keep Yearlies",
+      "description": "Number of yearly backups to keep. Example: 2",
+      "default": "2",
+      "recipes": [
+        "rs-storage::backup"
+      ],
+      "required": "optional",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/backup/keep/keep_last": {
+      "display_name": "Backup Keep Last Snapshots",
+      "description": "Number of snapshots to keep. Example: 60",
+      "default": "60",
+      "recipes": [
+        "rs-storage::backup"
+      ],
+      "required": "optional",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/schedule/enable": {
+      "display_name": "Backup Schedule Enable",
+      "description": "Enable or disable periodic backup schedule",
+      "default": "false",
+      "choice": [
+        "true",
+        "false"
+      ],
+      "recipes": [
+        "rs-storage::schedule"
+      ],
+      "required": "recommended",
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/schedule/hour": {
+      "display_name": "Backup Schedule Hour",
+      "description": "The hour to schedule the backup on. This value should abide by crontab syntax. Use '*' for taking' +\n    ' backups every hour. Example: 23",
+      "recipes": [
+        "rs-storage::schedule"
+      ],
+      "required": "required",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    },
+    "rs-storage/schedule/minute": {
+      "display_name": "Backup Schedule Minute",
+      "description": "The minute to schedule the backup on. This value should abide by crontab syntax. Example: 30",
+      "recipes": [
+        "rs-storage::schedule"
+      ],
+      "required": "required",
+      "choice": [
+
+      ],
+      "calculated": false,
+      "type": "string"
+    }
+  },
+  "groupings": {
+  },
+  "recipes": {
+    "rs-storage::default": "Sets up required dependencies for using this cookbook",
+    "rs-storage::volume": "Creates a volume and attaches it to the server",
+    "rs-storage::stripe": "Creates volumes, attaches them to the server, and sets up a striped LVM",
+    "rs-storage::backup": {
+      "description": "Creates a backup",
+      "thread": "storage_backup"
+    },
+    "rs-storage::decommission": "Destroys LVM conditionally, detaches and destroys volumes. This recipe should be used as a decommission recipe in a RightScale ServerTemplate.",
+    "rs-storage::schedule": "Enable/disable periodic backups based on rs-storage/schedule/enable"
+  },
+  "version": "1.0.7",
+  "source_url": "",
+  "issues_url": ""
+}

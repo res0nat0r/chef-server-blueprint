@@ -1,0 +1,13 @@
+notifications:
+  slack:
+    secure: XEZh2W6HbKLwUPEwtE5SFcc88QHNWfYXo3JwHxa100nP/+rzxtRmAeEoaXGJtC8T70YafkrlS43q4fkuAPcTfJJs1tIbo9BQaIiMtlri1uTxm0BVf5gU7LmY4wgtqz95yeWk3Tn8lGaHp0D2KCkgPEhslEaczA6AqWmVwG8Imqk=
+
+language: ruby
+rvm:
+  - 2.0.0
+  - 1.9.3
+before_script: bundle exec berks install
+script: bundle exec strainer test --except kitchen
+
+env:
+  - CHEF_VERSION=0.11.6 #v14.1
