@@ -7,4 +7,4 @@ cookbook 'rightscale_volume', github:'cdwilhelm/rightscale_volume',branch: 'curt
 cookbook 'rightscale_backup', github:'cdwilhelm/rightscale_backup',branch: 'curt-dev'
 cookbook 'machine_tag', github:'cdwilhelm/machine_tag',branch: 'curt-dev'
 cookbook 'rsc_ros', github: "RightScale-Services-Cookbooks/rsc_ros"
-cookbook 'rsc_postfix', github:"RightScale-Services-Cookbooks/rsc_ros", tag:'v1.0.0'
+cookbook 'rsc_postfix', github:"RightScale-Services-Cookbooks/rsc_postfix", tag:'v1.0.0'
