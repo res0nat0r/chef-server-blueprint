@@ -8,7 +8,6 @@ end
 schedule_enable = node['chef-server-blueprint']['schedule']['enable'] == true || node['chef-server-blueprint']['schedule']['enable'] == 'true'
 schedule_hour = node['chef-server-blueprint']['schedule']['hour']
 schedule_minute = node['chef-server-blueprint']['schedule']['minute']
-lineage = node['chef-server-blueprint']['backup']['lineage']
 
 if schedule_enable
   # Both schedule hour and minute should be set
