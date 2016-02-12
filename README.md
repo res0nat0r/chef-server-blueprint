@@ -4,12 +4,18 @@ This is a thin wrapper around chef-server::default which allows me to pass in at
 
 Requirements
 ------------
+ * [RightLink 10](http://docs.rightscale.com/rl10/) See cookbook version 0.1.7 for RightLink 6 support
+ * Platform
+   * Ubuntu 12.04
+   * CentOS 6
 
 #### Platform
 All the same ones chef-server supports
 
 #### Cookbooks
 - `chef-server` - Like I said, this is just a thin wrapper.
+- `rsc_ros` - for using remote object store (i.e. s3) for backup and restore
+- `rsc_postfix` - for sending mail through a mail relay service such as SES or SendGrid
 
 Recipes
 ----------
