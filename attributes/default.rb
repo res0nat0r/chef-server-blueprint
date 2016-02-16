@@ -1,4 +1,4 @@
-default["chef-server-blueprint"]["version"] = '12.0.8-1.el6'
+default["chef-server-blueprint"]["version"] = nil
 default['packagecloud']['base_url'] = 'http://packagecloud.io'
 default['rsc_ros']['gems']['fog'] = '1.36.0'
 
