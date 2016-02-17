@@ -9,8 +9,9 @@ Github Repository: https://github.com/RightScale-Services-Cookbooks/chef-server-
 # Requirements
 * Requires Chef 11 or higher
 * Requires Ruby 1.9 or higher
+* [RightLink 10](http://docs.rightscale.com/rl10/) See cookbook version 0.1.7 for RightLink 6 support
 * Platform
-  * RHEL/CentOS 6 64-bit
+  * RHEL/CentOS 6/7 64-bit
   * Ubuntu 12.04 64-bit
   * Ubuntu 14.04 64-bit
 * Cookbooks

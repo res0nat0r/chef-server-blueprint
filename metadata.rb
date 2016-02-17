@@ -4,12 +4,12 @@ maintainer_email 'me@ryangeyer.com'
 license          'All rights reserved'
 description      'Installs/Configures chef-server-blueprint'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '0.1.7'
+version          '1.0.0'
 
 depends "marker"
 depends "packagecloud"
-depends "chef-server"
-depends "rsc_ros", ">= 0.2.1"
+depends "chef-server", '~> 4.1.0'
+depends "rsc_ros", "~> 0.3.0"
 
 # Support everything the chef-server cookbook supports
 %w{ ubuntu redhat centos fedora amazon scientific oracle }.each do |os|
@@ -19,9 +19,9 @@ end
 recipe "chef-server-blueprint::default", "Same as chef-server::default, but with inputs and optional package download"
 recipe "chef-server-blueprint::chef-ros-backup", "Backup chef server to Remote Object Storage(ex: AWS S3, RackSpace CloudFiles, etc)"
 recipe "chef-server-blueprint::chef-ros-restore", "Restore chef server from a  Remote Object Storage(ex: AWS S3, RackSpace CloudFiles, etc) backup"
-recipe "chef-server-blueprint::backup_schedule_enable", "Enables chef-server-blueprint::chef-ros-backup to be run hourly."
-recipe "chef-server-blueprint::backup_schedule_disable", "Disables chef-server-blueprint::chef-ros-backup from being run hourly."
+recipe "chef-server-blueprint::schedule", "Enables chef-server-blueprint::chef-ros-backup to be run hourly."
 recipe "chef-server-blueprint::install-webui", "installs webui"
+recipe "chef-server-blueprint::schedule", "Schedule a block storage backup"
 
 attribute "chef-server-blueprint/api_fqdn",
     :display_name => "Chef Server FQDN",
@@ -92,7 +92,7 @@ attribute "chef-server-blueprint/backup/storage_account_id",
   :recipes => [
     "chef-server-blueprint::chef-ros-backup",
     "chef-server-blueprint::chef-ros-restore",
-	"chef-server-blueprint::backup_schedule_enable"
+	"chef-server-blueprint::schedule"
   ]
 
 attribute "chef-server-blueprint/backup/storage_account_secret",
@@ -108,7 +108,7 @@ attribute "chef-server-blueprint/backup/storage_account_secret",
   :recipes => [
     "chef-server-blueprint::chef-ros-backup",
     "chef-server-blueprint::chef-ros-restore",
-	"chef-server-blueprint::backup_schedule_enable"
+	"chef-server-blueprint::schedule"
   ]
 
 attribute "chef-server-blueprint/backup/storage_account_endpoint",
@@ -122,7 +122,7 @@ attribute "chef-server-blueprint/backup/storage_account_endpoint",
   :recipes => [
     "chef-server-blueprint::chef-ros-backup",
     "chef-server-blueprint::chef-ros-restore",
-	"chef-server-blueprint::backup_schedule_enable"
+	"chef-server-blueprint::schedule"
   ]
 
 attribute "chef-server-blueprint/backup/container",
@@ -136,5 +136,25 @@ attribute "chef-server-blueprint/backup/container",
   :recipes => [
     "chef-server-blueprint::chef-ros-backup",
     "chef-server-blueprint::chef-ros-restore",
-	"chef-server-blueprint::backup_schedule_enable"
+	"chef-server-blueprint::schedule"
   ]
+attribute "chef-server-blueprint/schedule/enable",
+  :display_name => 'Backup Schedule Enable',
+  :description => 'Enable or disable periodic backup schedule',
+  :default => 'false',
+  :choice => ['true', 'false'],
+  :recipes => [	"chef-server-blueprint::schedule"  ],
+  :required => 'recommended'
+
+attribute 'chef-server-blueprint/schedule/hour',
+  :display_name => 'Backup Schedule Hour',
+  :description => "The hour to schedule the backup on. This value should abide by crontab syntax. Use '*' for taking" +
+    ' backups every hour. Example: 23',
+  :recipes => ['rs-mysql::schedule'],
+  :required => 'required'
+
+attribute 'chef-server-blueprint/schedule/minute',
+  :display_name => 'Backup Schedule Minute',
+  :description => 'The minute to schedule the backup on. This value should abide by crontab syntax. Example: 30',
+  :recipes => ['rs-mysql::schedule'],
+  :required => 'required'

@@ -44,7 +44,7 @@ cookbook_file backup_script do
   action :create
 end
 
-bash "*** Downloading latest backup from '#{container}/chef-backups/', cloud #{cloud}" do
+bash "*** Restoring '#{container}/chef-backups/#{prefix}', cloud #{cloud}" do
   flags "-ex"
   user "root"
   code <<-EOH
