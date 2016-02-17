@@ -1,0 +1,10 @@
+language: ruby
+rvm:
+- 2.0.0
+- 1.9.3
+before_script: bundle exec berks install
+script: bundle exec strainer test --except kitchen
+notifications:
+  slack:
+    secure: A1zr5ovFz2LduhkNe1h+EtFH8m9SzzM+YujuNrrMfMpUdSjEIudW07vNkOrBKYkEpIiPOg6HEL7oqfT+i+jODkuyvockUIBgWuy8oAhg3UrVxLnngRbQCIGcg18PxW3TZRpET8AymMfktU8k9SPmsfEAIPE2S/jo174vjqkqg+Y=
+
