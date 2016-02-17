@@ -48,7 +48,8 @@ bash "*** Restoring '#{container}/chef-backups/#{prefix}', cloud #{cloud}" do
   flags "-ex"
   user "root"
   code <<-EOH
-    echo "#{backup_script} --restore #{download_file}" >> /root/backup.sh
+    echo "#{backup_script} --restore #{download_file}" > /root/backup.sh
     sh /root/backup.sh
+    rm -rf /tmp/chef-backup
   EOH
 end
