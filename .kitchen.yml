@@ -14,3 +14,6 @@ suites:
     run_list:
       - recipe[chef-server-blueprint::default]
     attributes:
+        chef-server-blueprint:
+            api_fqdn: 'chef-server-tk.example.com'
+            version: 12.4.1
