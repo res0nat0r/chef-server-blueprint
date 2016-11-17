@@ -2,7 +2,19 @@
 
 This file is used to list changes made in each version of chef-server-blueprint.
 
-## 0.1.0:
+## 1.0.3:
+
+* Add Region support for backup and Restore
+
+## 1.0.2:
+
+* update chef-server cookbook to 5.0.1
+
+## 1.0.1:
+
+* Update Berksfile to allow http proxy use.
+
+## 1.0.0:
 
 * Initial release of chef-server-blueprint
 

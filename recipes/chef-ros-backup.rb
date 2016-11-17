@@ -53,5 +53,6 @@ rsc_ros "uploading files" do
   secret_key        node['chef-server-blueprint']['backup']['storage_account_secret']
   bucket            container
   file              backup_dst
+  region            node['chef-server-blueprint']['backup']['region']
   action            :upload
 end

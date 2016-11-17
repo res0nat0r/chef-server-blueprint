@@ -32,6 +32,7 @@ rsc_ros download_file do
   bucket            container
   file              node['chef-server-blueprint']['backup']['lineage']
   destination       download_file
+  region            node['chef-server-blueprint']['backup']['region']
   action            :download
 end
 
