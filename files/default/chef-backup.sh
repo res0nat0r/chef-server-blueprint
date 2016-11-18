@@ -42,34 +42,9 @@ id ${_BACKUP_USER} &> /dev/null
 
 set -e
 set -x
-# Create folders
-mkdir -p ${_TMP}
-mkdir -p ${_TMP}/postgresql
-mkdir -p ${_BACKUP_DIR}/chef-backup
+rm -rf /var/opt/chef-backup
+chef-server-ctl backup --yes
 
-chef-server-ctl org-list >> ${_TMP}/orglist.txt
-chef-server-ctl stop
-
-
-# Backup database
-chef-server-ctl start postgresql
-pg_running
-_pg_dump > ${_TMP}/postgresql/pg_opscode_chef.sql
-chef-server-ctl stop postgresql
-
-cd ${_SYS_TMP}
-    if [[ -e ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2 ]]; then
-        mv ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2{,.previous}
-    fi
-
-    tar cvjpf ${_BACKUP_DIR}/chef-backup/chef-backup.tar.bz2 ${_TMP}/postgresql /etc/opscode /var/opt/opscode ${_TMP}/orglist.txt
-    chown -R ${_BACKUP_USER}:${_BACKUP_USER} ${_BACKUP_DIR}/chef-backup/
-    chmod -R g-rwx,o-rwx ${_BACKUP_DIR}/chef-backup/
-
-
-    rm -Rf ${_TMP}
-chef-server-ctl start
-pg_running
 }
 
 
@@ -82,21 +57,12 @@ echo "Restore function"
 
     set -e
     set -x
-    chef-server-ctl stop
-    tar xvjpf ${source} --exclude='var/opt/opscode/drbd/data/postgresql_9.2' -C /
-    chef-server-ctl start postgresql
-    pg_running
-    _pg_dump > /var/opt/opscode/pg_opscode_chef.sql.$(date +%Y-%m-%d_%H:%M:%S).bak
-    ADIR=`ls /tmp/chef-backup/`
-    _TMP_RESTORE="${_SYS_TMP}/chef-backup/$ADIR"
-    cd ${_TMP_RESTORE}
-    su - opscode-pgsql -c "/opt/opscode/embedded/bin/psql opscode_chef  < ${_TMP_RESTORE}/postgresql/pg_opscode_chef.sql"
 
-    chef-server-ctl start
+    chef-server-ctl restore ${source}
     sleep 30
     chef-server-ctl reconfigure
     sleep 30
-    opscode-manage-ctl reconfigure
+    chef-manage-ctl reconfigure
     cd ~
     rm -Rf ${_TMP_RESTORE}
 }

@@ -43,7 +43,7 @@ bash "*** Uploading '#{backup_src}' to '#{cloud}' container '#{container}/chef-b
   user "root"
   code <<-EOH
     #{backup_script} --backup
-    mv #{backup_src} #{backup_dst}
+  #  mv #{backup_src} #{backup_dst}
   EOH
 end
 
