@@ -44,7 +44,7 @@ set -e
 set -x
 rm -rf /var/opt/chef-backup
 chef-server-ctl backup --yes
-
+mv /var/opt/chef-backup/chef-backup-* /var/opt/chef-backup/chef-backup.tgz
 }
 
 
