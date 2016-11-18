@@ -8,7 +8,6 @@ version          '1.0.3'
 
 depends "marker"
 depends "packagecloud"
-
 depends "chef-server", '= 5.0.1'
 depends "rsc_ros", "~> 0.7.0"
 
