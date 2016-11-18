@@ -58,10 +58,10 @@ echo "Restore function"
     set -e
     set -x
 
-    chef-server-ctl restore ${source}
+    chef-server-ctl restore ${source} -c
     sleep 30
-    chef-server-ctl reconfigure
-    sleep 30
+    #chef-server-ctl reconfigure
+    #sleep 30
     chef-manage-ctl reconfigure
     cd ~
     rm -Rf ${_TMP_RESTORE}

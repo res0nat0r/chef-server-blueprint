@@ -23,9 +23,9 @@ prefix = node['chef-server-blueprint']['backup']['lineage']
 backup_script = '/usr/local/bin/chef-backup.sh'
 include_recipe "rsc_ros::default"
 
-download_file = File.join(Chef::Config[:file_cache_path],"chef-backup.tar.bz2")
+download_file = File.join(Chef::Config[:file_cache_path],"chef-backup.tgz")
 
-rsc_ros download_file do
+rsc_ros "Downloading #{download_file}" do
   storage_provider  cloud
   access_key        node['chef-server-blueprint']['backup']['storage_account_id']
   secret_key        node['chef-server-blueprint']['backup']['storage_account_secret']
@@ -45,7 +45,7 @@ cookbook_file backup_script do
   action :create
 end
 
-bash "*** Restoring '#{container}/chef-backups/#{prefix}', cloud #{cloud}" do
+bash "*** Restoring #{download_file}" do
   flags "-ex"
   user "root"
   code <<-EOH
