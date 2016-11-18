@@ -5,6 +5,7 @@ gem 'thor-foodcritic'
 gem 'rack', '= 1.6.4'
 gem 'json', '~> 1.8', '>= 1.8.3'
 gem 'buff-ignore', '= 1.1.1'
+gem 'net-http-persistent', '= 2.9.4'
 
 group :integration do
 # Prior to 0.1.6, libyaml is vulnerable to a heap overflow exploit from malicious YAML payloads.
