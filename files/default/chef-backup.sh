@@ -43,6 +43,8 @@ id ${_BACKUP_USER} &> /dev/null
 set -e
 set -x
 rm -rf /var/opt/chef-backup
+chef-server-ctl reconfigure
+sleep 60 #wait for reconfigure
 chef-server-ctl backup --yes
 mv /var/opt/chef-backup/chef-backup-* /var/opt/chef-backup/chef-backup.tgz
 }
@@ -58,6 +60,7 @@ echo "Restore function"
     set -e
     set -x
     chef-server-ctl reconfigure
+    sleep 60 #wait for reconfigure
     chef-server-ctl restore ${source} -c
     sleep 30
     #chef-server-ctl reconfigure
