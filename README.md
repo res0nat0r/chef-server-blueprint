@@ -2,7 +2,7 @@ chef-server-blueprint Cookbook
 ==============================
 Provides recipes for managing a _standalone_ Chef Server with RightScale, including:
 * Installation and Configuration of a _standalone_ Chef Server
-* Scheduled backups and restore
+* Scheduled backups and restore (Chef 12 only)
 
 Github Repository: https://github.com/RightScale-Services-Cookbooks/chef-server-blueprint
 
@@ -30,8 +30,8 @@ To setup a standalone Chef Server, place the `chef-server-blueprint::default` re
 
 ## Creating a Backup
 To create a manual backup of the Chef Server configuration, run the `chef-server-blueprint::chef-ros-backup` recipe with the following inputs set:
-- `node['chef-server-blueprint']['backup']['lineage']` - The prefix that will be used to name/locate the backup of a particular VPN server. 
-- `node['chef-server-blueprint']['backup']['storage_account_provider']` - The storage provider where the dump file will be saved. 
+- `node['chef-server-blueprint']['backup']['lineage']` - The prefix that will be used to name/locate the backup of a particular VPN server.
+- `node['chef-server-blueprint']['backup']['storage_account_provider']` - The storage provider where the dump file will be saved.
 - `node['chef-server-blueprint']['backup']['storage_account_id']` - The storage provider authentication user.
 - `node['chef-server-blueprint']['backup']['storage_account_secret']` - The storage provider authentication secret/password.
 - `node['chef-server-blueprint']['backup']['storage_account_endpoint']` - The endpoint URL for the storage cloud.
@@ -49,7 +49,7 @@ NOTE: The lineage input currently requires the complete filename in order to res
 ```
 To restore from a Backup, run the `chef-server-blueprint::chef-ros-restore` recipe with the following inputs set:
 - `node['chef-server-blueprint']['backup']['lineage']` - *The entire filename of the backup as it was uploaded to remote storage*
-- `node['chef-server-blueprint']['backup']['storage_account_provider']` - The storage provider where the dump file will be saved. 
+- `node['chef-server-blueprint']['backup']['storage_account_provider']` - The storage provider where the dump file will be saved.
 - `node['chef-server-blueprint']['backup']['storage_account_id']` - The storage provider authentication user.
 - `node['chef-server-blueprint']['backup']['storage_account_secret']` - The storage provider authentication secret/password.
 - `node['chef-server-blueprint']['backup']['storage_account_endpoint']` - The endpoint URL for the storage cloud.
@@ -62,8 +62,8 @@ To install the WebUI, run the `chef-server-blueprint::install-webui` recipe.
 - `node['chef-server-blueprint'][api_fqdn]` - FQDN of this Chef Server
 - `node['chef-server-blueprint'][remote_file]` - Install Chef Server from a remote file instead of specifying `version`. (Optional)
 - `node['chef-server-blueprint']['version']` - Version of Chef Server to install (Optional)
-- `node['chef-server-blueprint']['backup']['lineage']` - The prefix that will be used to name/locate the backup of a particular VPN server. 
-- `node['chef-server-blueprint']['backup']['storage_account_provider']` - The storage provider where the dump file will be saved. 
+- `node['chef-server-blueprint']['backup']['lineage']` - The prefix that will be used to name/locate the backup of a particular VPN server.
+- `node['chef-server-blueprint']['backup']['storage_account_provider']` - The storage provider where the dump file will be saved.
 - `node['chef-server-blueprint']['backup']['storage_account_id']` - The storage provider authentication user.
 - `node['chef-server-blueprint']['backup']['storage_account_secret']` - The storage provider authentication secret/password.
 - `node['chef-server-blueprint']['backup']['storage_account_endpoint']` - The endpoint URL for the storage cloud.
@@ -73,10 +73,6 @@ To install the WebUI, run the `chef-server-blueprint::install-webui` recipe.
 ## `chef-server-blueprint::default`
 
 Installs and configures the instance as a _standalone_ Chef Server using the `version` specified for downloading from package.io *OR* using a user specified `remote_file` to perform the installation.
-
-## `chef-server-blueprint::install-webui`
-
-Installs the Chef Server Web UI.
 
 ## `chef-server-blueprint::chef-ros-backup`
 
@@ -92,6 +88,6 @@ Creates a cron entry that runs the `chef-ros-backup` recipe every hour.
 
 ## `chef-server-blueprint::backup-schedule-disable`
 
-Removes the cron entry created by `backup-schedule-enable`. 
+Removes the cron entry created by `backup-schedule-enable`.
 
 # Author
