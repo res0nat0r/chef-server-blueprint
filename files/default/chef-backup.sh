@@ -57,7 +57,7 @@ echo "Restore function"
 
     set -e
     set -x
-
+    chef-server-ctl reconfigure
     chef-server-ctl restore ${source} -c
     sleep 30
     #chef-server-ctl reconfigure
