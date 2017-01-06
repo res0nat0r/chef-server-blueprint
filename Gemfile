@@ -7,6 +7,7 @@ gem 'thor-foodcritic'
 gem 'rake'
 gem 'rack', '~> 1.0'
 gem 'chef', '~> 11'
+gem 'nio4r', '~> 1.2', '>= 1.2.1'
 
 group :integration do
   # Prior to 0.1.6, libyaml is vulnerable to a heap overflow exploit from malicious YAML payloads.
