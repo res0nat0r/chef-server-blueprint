@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of chef-server-blueprint.
 
+## 1.0.4
+
+* pinning cookbooks and nio4r
+
 ## 1.0.3:
 
 * Add Region support for backup and Restore
