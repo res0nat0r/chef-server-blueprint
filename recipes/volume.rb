@@ -17,19 +17,18 @@
 # limitations under the License.
 #
 
-marker "recipe_start_rightscale" do
-  template "rightscale_audit_entry.erb"
+marker 'recipe_start_rightscale' do
+  template 'rightscale_audit_entry.erb'
 end
 
-detach_timeout = node['chef-server-blueprint']['device']['detach_timeout'].to_i
+# detach_timeout = node['chef-server-blueprint']['device']['detach_timeout'].to_i
 device_nickname = node['chef-server-blueprint']['device']['nickname']
 size = node['chef-server-blueprint']['device']['volume_size'].to_i
 
-#execute "set decommission timeout to #{detach_timeout}" do
+# execute "set decommission timeout to #{detach_timeout}" do
 #  command "rs_config --set decommission_timeout #{detach_timeout}"
 #  not_if "[ `rs_config --get decommission_timeout` -eq #{detach_timeout} ]"
-#end
-
+# end
 
 # Cloud-specific volume options
 volume_options = {}
@@ -50,7 +49,7 @@ if node['chef-server-blueprint']['restore']['lineage'].to_s.empty?
 
   # Filesystem label must be <= 12 chars
   filesystem device_nickname do
-    label device_nickname[0,12]
+    label device_nickname[0, 12]
     fstype node['chef-server-blueprint']['device']['filesystem']
     device lazy { node['rightscale_volume'][device_nickname]['device'] }
     mkfs_options node['chef-server-blueprint']['device']['mkfs_options']
@@ -86,11 +85,9 @@ else
     action [:mount, :enable]
   end
 
-
 end
 
 mv '/var/opt/opscode/bookshelf/' do
-  
 end
 
 directory '/var/opt/opscode/bookshelf/' do
@@ -101,7 +98,7 @@ end
 link '/var/opt/opscode/bookshelf/' do
   to new_chef_dir
 end
-  
+
 # Make sure that there is a 'chef' directory on the mount point of the volume
 directory new_chef_dir do
   owner 'opscode'

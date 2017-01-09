@@ -2,6 +2,10 @@
 
 This file is used to list changes made in each version of chef-server-blueprint.
 
+## 2.0.0
+
+* update to chef12
+
 ## 1.0.3:
 
 * Add Region support for backup and Restore

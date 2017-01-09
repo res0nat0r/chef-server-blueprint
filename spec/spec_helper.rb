@@ -22,9 +22,9 @@ $LOAD_PATH.unshift(libraries_path) unless $LOAD_PATH.include?(libraries_path)
 require 'chefspec'
 require 'chefspec/berkshelf'
 
-
 RSpec.configure do |config|
   config.platform = 'centos'
   config.version = '6.6'
   config.log_level = :error
 end
+at_exit { ChefSpec::Coverage.report! }

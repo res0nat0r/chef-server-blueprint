@@ -1,13 +1,13 @@
 language: ruby
 rvm:
-- 2.1.0
+- 2.3.1
 before_install:
-- curl -L https://www.getchef.com/chef/install.sh | sudo bash -s -- -P chefdk -v 0.14.25
+- curl -L https://www.getchef.com/chef/install.sh | sudo bash -s -- -P chefdk -v 1.0.3
 - gem install bundler -v 1.11.2
 install:
-  - chef exec bundle install --jobs=3 --retry=3
-before_script: chef exec bundle exec rake setup_test_environment
-script: chef exec bundle exec rake except_kitchen
+- chef exec bundle install --jobs=3 --retry=3
+before_script: chef exec rake setup_test_environment
+script: "./.travis_install.sh"
 notifications:
   slack:
-    secure: A1zr5ovFz2LduhkNe1h+EtFH8m9SzzM+YujuNrrMfMpUdSjEIudW07vNkOrBKYkEpIiPOg6HEL7oqfT+i+jODkuyvockUIBgWuy8oAhg3UrVxLnngRbQCIGcg18PxW3TZRpET8AymMfktU8k9SPmsfEAIPE2S/jo174vjqkqg+Y=
+    secure: dHyek+5rD7oHeY3RGGpbwgUmEiua4BVdVTrPxoQjZh7yWiADLX0gDf4I4YtU+zwWbErwE0S2ygTp8t4a1WJ/8qscybTV9+D3Q6DUsAPQGJpz5kiYzRWPn+CFI12bjpzGiJE40t11ZquMX2HgaAFmYDi2JL8+NWXLMTHwgm0DLujGAOgti+Q3Hfb0IVY8sZRFpulvghagZukpjZvPsqzA+/LOvBXLtCr+jd9D2mpiOFs7hbLgJSM7qXA/Snb0fubEWQ3V5SgmZGHuLiYlWjnc/lYK4WolJ0SfcnzZJUAxOiJNCiKvsUj3+EKSKj8S8u3IaOi89AU2bFL/QKPeKpNUWFbLmOgIgc1gA3mPoJG5L4PGMjt6hQIE1/8MvPOJWQX7RchSps13eoiTyihht12N/xy2546g6WVrZJUz/DbV3Y4t0F4Mp1MWPLmQn4ZTw2Fm+WW0119b48wI0pU6zAHkaGStapVc//0BEvHM3EJzLb5MG8tin+yyw0TKnbrlwXyzgptR/qTLnk56cSMWqi+wh0hY+Hsfzs7n7HZl5cAuIEQ5jG8B31HU6khgALkNmggk6qlKLDd7u0x8QA5H7ZSgIXduN9+VNVSlp+Un/2c3croW8svZuK17kPtoIZg9LKznDLoe/1NTFDhNiiY6vuSk5lzhcj6N6xdJKTQlQ7YWOCU=
