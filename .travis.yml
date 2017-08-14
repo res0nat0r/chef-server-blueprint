@@ -2,12 +2,11 @@ language: ruby
 rvm:
 - 2.1.0
 before_install:
-- curl -L https://www.getchef.com/chef/install.sh | sudo bash -s -- -P chefdk -v 0.14.25
-- gem install bundler -v 1.11.2
+- curl -L https://www.getchef.com/chef/install.sh | sudo bash -s -- -P chefdk -v 2.0.26
 install:
   - chef exec bundle install --jobs=3 --retry=3
-before_script: chef exec bundle exec rake setup_test_environment
-script: chef exec bundle exec rake except_kitchen
+before_script: chef exec rake setup_test_environment
+script: chef exec rake except_kitchen
 notifications:
   slack:
     secure: A1zr5ovFz2LduhkNe1h+EtFH8m9SzzM+YujuNrrMfMpUdSjEIudW07vNkOrBKYkEpIiPOg6HEL7oqfT+i+jODkuyvockUIBgWuy8oAhg3UrVxLnngRbQCIGcg18PxW3TZRpET8AymMfktU8k9SPmsfEAIPE2S/jo174vjqkqg+Y=

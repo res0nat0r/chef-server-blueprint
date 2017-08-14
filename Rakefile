@@ -19,14 +19,14 @@ end
 
 desc "runs knife cookbook test"
 task :knife => [ :setup_test_environment ] do
-  cmd = "bundle exec knife cookbook test #{cookbook} -c knife.rb"
+  cmd = "chef exec knife cookbook test #{cookbook} -c knife.rb"
   puts cmd
   system(cmd)
 end
 
 desc "runs foodcritic"
 task :foodcritic do
-  cmd = "bundle exec foodcritic --epic-fail any --tags ~FC009 --tags ~FC064 --tags ~FC065 #{directory}"
+  cmd = "chef exec foodcritic --epic-fail any --tags ~FC009 --tags ~FC064 --tags ~FC065 --tags ~FC072 --tags ~FC082 #{directory}"
   puts cmd
   system(cmd)
 end
@@ -42,7 +42,7 @@ end
 
 desc "runs rspec"
 task :rspec do
-  cmd = "bundle exec rspec --color --format documentation"
+  cmd = "chef exec rspec --color --format documentation"
   puts cmd
   system(cmd)
 end

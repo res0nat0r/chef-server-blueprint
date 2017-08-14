@@ -1,14 +1,15 @@
 name             'chef-server-blueprint'
 maintainer       'Ryan J. Geyer'
 maintainer_email 'me@ryangeyer.com'
-license          'All rights reserved'
+license          'Apache-2.0'
 description      'Installs/Configures chef-server-blueprint'
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          '1.0.4'
+version          '1.0.5'
+chef_version     '>= 12.0'
 
 depends "marker"
 depends "packagecloud"
-depends "chef-server", '= 5.0.1'
+depends "chef-server", '= 5.3.0'
 depends "rsc_ros", "~> 0.7.0"
 
 # Support everything the chef-server cookbook supports
